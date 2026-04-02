@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
@@ -10,6 +10,10 @@ import Enquiries from './pages/user/Enquiries';
 import SavedProducts from './pages/user/SavedProducts';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProductListing from './pages/products/ProductListing';
+import ProductDetail from './pages/products/ProductDetail';
+import NotFound from './pages/NotFound';
+import Navbar from './components/common/Navbar';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -18,6 +22,9 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
+        <Route path="/products" element={<ProductListing />} />
+        <Route path="/products/:category" element={<ProductListing />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -47,7 +54,7 @@ function AnimatedRoutes() {
             </ProtectedRoute>
           } 
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </AnimatePresence>
   );
@@ -57,6 +64,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen">
+        <Navbar />
         <AnimatedRoutes />
       </div>
     </Router>

@@ -1,11 +1,12 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 interface ButtonProps {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   onClick?: () => void;
+  to?: string;
   className?: string;
   type?: 'button' | 'submit';
 }
@@ -14,6 +15,7 @@ const Button: React.FC<ButtonProps> = ({
   children, 
   variant = 'primary', 
   onClick, 
+  to,
   className = '',
   type = 'button'
 }) => {
@@ -26,6 +28,34 @@ const Button: React.FC<ButtonProps> = ({
     ghost: "text-premium-charcoal hover:bg-premium-charcoal/5"
   };
 
+  const content = (
+    <>
+      <span className="relative z-10 flex items-center justify-center gap-2">
+        {children}
+      </span>
+      {/* Shine sweep effect */}
+      <span className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out"></span>
+    </>
+  );
+
+  if (to) {
+    return (
+      <motion.div
+        whileHover={{ scale: 1.02, y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        className="inline-block"
+      >
+        <Link 
+          to={to} 
+          className={`${baseStyles} ${variants[variant]} ${className} inline-flex items-center justify-center`}
+        >
+          {content}
+        </Link>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.button
       type={type}
@@ -35,12 +65,7 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       className={`${baseStyles} ${variants[variant]} ${className}`}
     >
-      <span className="relative z-10 flex items-center justify-center gap-2">
-        {children}
-      </span>
-      
-      {/* Shine sweep effect */}
-      <span className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] group-hover:left-[200%] transition-all duration-1000 ease-in-out"></span>
+      {content}
     </motion.button>
   );
 };

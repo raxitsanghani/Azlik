@@ -2,12 +2,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const collections = [
-  { id: 1, title: 'Designer Faucets', subtitle: 'The Flow of Elegance', image: '/collection_faucets.png' },
-  { id: 2, title: 'Luxury Showers', subtitle: 'Pure Revitalization', image: '/collection_showers.png' },
-  { id: 3, title: 'Bespoke Accessories', subtitle: 'Refining Details', image: '/collection_accessories.png' },
-  { id: 4, title: 'Marble Basins', subtitle: 'Sculptural Sanctuary', image: '/collection_basins.png' }
+  { id: 1, title: 'Designer Faucets', subtitle: 'The Flow of Elegance', image: '/collection_faucets.png', category: 'faucets' },
+  { id: 2, title: 'Luxury Showers', subtitle: 'Pure Revitalization', image: '/collection_showers.png', category: 'showers' },
+  { id: 3, title: 'Bespoke Accessories', subtitle: 'Refining Details', image: '/collection_accessories.png', category: 'accessories' },
+  { id: 4, title: 'Smart Mirrors', subtitle: 'Light & Reflection', image: '/collection_mirrors.png', category: 'mirrors' }
 ];
 
 const Collections: React.FC = () => {
@@ -59,42 +60,47 @@ const Collections: React.FC = () => {
           }}
         >
           {collections.map((item) => (
-            <motion.div
+            <Link 
+              to={`/products/${item.category}`}
               key={item.id}
-              variants={{
-                initial: { opacity: 0, y: 30 },
-                animate: { 
-                  opacity: 1, 
-                  y: 0,
-                  transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-                }
-              }}
-              className="group relative h-[520px] overflow-hidden cursor-pointer rounded-sm shadow-xl hover:shadow-2xl transition-shadow duration-500"
+              className="block"
             >
-              <motion.div 
-                className="absolute inset-0 z-0"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              <motion.div
+                variants={{
+                  initial: { opacity: 0, y: 30 },
+                  animate: { 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+                  }
+                }}
+                className="group relative h-[520px] overflow-hidden cursor-pointer rounded-sm shadow-xl hover:shadow-2xl transition-shadow duration-500"
               >
-                <img 
-                   src={item.image} 
-                   alt={item.title} 
-                   className="w-full h-full object-cover transition-all duration-1000"
-                />
-                {/* Refined gradient overlay for text readability without obscuring product color */}
-                <div className="absolute inset-0 bg-gradient-to-t from-premium-charcoal/70 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
-              </motion.div>
+                <motion.div 
+                  className="absolute inset-0 z-0"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <img 
+                    src={item.image} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover transition-all duration-1000"
+                  />
+                  {/* Refined gradient overlay for text readability without obscuring product color */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-premium-charcoal/70 via-transparent to-transparent opacity-40 group-hover:opacity-60 transition-opacity duration-500"></div>
+                </motion.div>
 
-              <div className="absolute inset-x-0 bottom-0 p-8 z-10 transition-transform duration-500 transform translate-y-4 group-hover:translate-y-0">
-                <p className="premium-subheading text-white/80 mb-2 !tracking-widest">{item.subtitle}</p>
-                <h3 className="premium-heading text-2xl text-white mb-4 drop-shadow-md">{item.title}</h3>
-                <div className="h-12 flex items-center">
-                  <span className="text-white text-[11px] uppercase tracking-[0.2em] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center gap-2">
-                    View Collection <ArrowUpRight size={14} />
-                  </span>
+                <div className="absolute inset-x-0 bottom-0 p-8 z-10 transition-transform duration-500 transform translate-y-4 group-hover:translate-y-0">
+                  <p className="premium-subheading text-white/80 mb-2 !tracking-widest">{item.subtitle}</p>
+                  <h3 className="premium-heading text-2xl text-white mb-4 drop-shadow-md">{item.title}</h3>
+                  <div className="h-12 flex items-center">
+                    <span className="text-white text-[11px] uppercase tracking-[0.2em] font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center gap-2">
+                      View Collection <ArrowUpRight size={14} />
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
+            </Link>
           ))}
         </motion.div>
       </div>

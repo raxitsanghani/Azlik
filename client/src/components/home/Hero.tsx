@@ -61,11 +61,11 @@ const Hero: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row gap-6"
           >
-            <Button variant="primary" className="!bg-white !text-premium-charcoal hover:!bg-premium-ivory">
+            <Button to="/products" variant="primary" className="!bg-white !text-premium-charcoal hover:!bg-premium-ivory">
               Explore Collections
               <ArrowRight size={16} />
             </Button>
-            <Button variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-premium-charcoal font-bold">
+            <Button to="/enquiries" variant="outline" className="!border-white !text-white hover:!bg-white hover:!text-premium-charcoal font-bold">
               Send Enquiry
             </Button>
           </motion.div>

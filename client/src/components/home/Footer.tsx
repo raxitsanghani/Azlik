@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Button from '../common/Button';
 import { ArrowRight, Instagram, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -29,7 +30,7 @@ const Footer: React.FC = () => {
                 elements for your premium bathroom space.
               </p>
             </div>
-            <Button variant="primary" className="!bg-white !text-premium-navy hover:!bg-premium-ivory w-full md:w-auto min-w-[240px]">
+            <Button to="/enquiries" variant="primary" className="!bg-white !text-premium-navy hover:!bg-premium-ivory w-full md:w-auto min-w-[240px]">
               Send Enquiry Now
               <ArrowRight size={16} />
             </Button>
@@ -57,12 +58,17 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="premium-subheading text-white mb-8">Collections</h4>
             <ul className="space-y-4 text-white/40 text-sm font-light">
-              {['Designer Faucets', 'Rainfall Showers', 'Marble Basins', 'Bespoke Accessories', 'Lighting', 'Textiles'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-white hover:pl-2 transition-all duration-300 flex items-center gap-2">
-                    <span className="w-0 h-[1px] bg-white group-hover:w-4 transition-all duration-300"></span>
-                    {link}
-                  </a>
+              {[
+                { name: 'Designer Faucets', path: '/products/faucets' },
+                { name: 'Rainfall Showers', path: '/products/showers' },
+                { name: 'Bespoke Accessories', path: '/products/accessories' },
+                { name: 'Smart Mirrors', path: '/products/mirrors' },
+                { name: 'Towel Holders', path: '/products/towel-holders' }
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link to={link.path} className="hover:text-white hover:pl-2 transition-all duration-300 flex items-center gap-2">
+                    {link.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -71,9 +77,15 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="premium-subheading text-white mb-8">Service</h4>
             <ul className="space-y-4 text-white/40 text-sm font-light">
-              {['Project Consultation', 'Technical Support', 'Catalogue Download', 'Enquiry Tracking', 'Warranty', 'Maintenance'].map((link) => (
-                <li key={link}>
-                  <a href="#" className="hover:text-white transition-all duration-300">{link}</a>
+              {[
+                { name: 'Project Consultation', path: '/enquiries' },
+                { name: 'Dashboard', path: '/dashboard' },
+                { name: 'Saved Products', path: '/saved-products' },
+                { name: 'Login', path: '/login' },
+                { name: 'Signup', path: '/signup' }
+              ].map((link) => (
+                <li key={link.name}>
+                  <Link to={link.path} className="hover:text-white transition-all duration-300">{link.name}</Link>
                 </li>
               ))}
             </ul>
