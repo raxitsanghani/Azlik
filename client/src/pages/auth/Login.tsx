@@ -29,10 +29,8 @@ const Login = () => {
         const user = JSON.parse(decodeURIComponent(userStr));
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // Use a toastId to ensure only one toast is rendered
-        toast.success(`Login successful. Welcome back, ${user.email}`, { toastId: 'login-success' });
-        
+
+        // Navigation only (OAuth redirect): no success toast for a clean/premium UX.
         // Redirect to Home Page instead of Dashboard
         navigate('/', { replace: true });
       } catch (err) {
@@ -55,6 +53,28 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Admin Access Logic
+    if (formData.email === 'azlikadmin@gmail.com' && formData.password === 'azlikadmin21') {
+      const adminUser = {
+        name: 'Azlik Admin',
+        email: 'azlikadmin@gmail.com',
+        role: 'admin',
+        id: 'admin_123'
+      };
+      
+      // Create admin session
+      localStorage.setItem('adminToken', 'premium_admin_token_xyz');
+      localStorage.setItem('adminUser', JSON.stringify(adminUser));
+      
+      toast.success('Admin login successful. Opening dashboard...', { toastId: 'admin-login-success' });
+      
+      setTimeout(() => {
+        navigate('/admin-dashboard', { replace: true });
+      }, 500);
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:2112/api/auth/login', formData);
       const { user, token } = response.data;

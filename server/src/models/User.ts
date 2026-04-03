@@ -10,6 +10,9 @@ export interface IUser extends Document {
   phone?: string;
   avatar?: string;
   isVerified: boolean;
+  lastLogin?: Date;
+  enquiriesCount?: number;
+  savedProductsCount?: number;
   createdAt: Date;
 }
 
@@ -23,6 +26,9 @@ const UserSchema: Schema = new Schema({
   otp: { type: String },
   otpExpires: { type: Date },
   isVerified: { type: Boolean, default: false },
+  lastLogin: { type: Date },
+  enquiriesCount: { type: Number, default: 0 },
+  savedProductsCount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 

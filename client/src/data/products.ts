@@ -2,11 +2,14 @@ export interface Product {
   id: string;
   name: string;
   image: string;
+  images?: string[];
   description: string;
-  category: 'faucets' | 'showers' | 'mirrors' | 'accessories' | 'towel-holders';
+  category: 'faucets' | 'showers' | 'mirrors' | 'accessories' | 'towel-holders' | string;
   material: string;
   finish: string;
   dimensions: string;
+  featured?: boolean;
+  status?: string;
 }
 
 export const products: Product[] = [
@@ -18,7 +21,8 @@ export const products: Product[] = [
     category: 'faucets',
     material: 'Solid Brass',
     finish: 'Brushed Gold',
-    dimensions: '200mm x 150mm'
+    dimensions: '200mm x 150mm',
+    featured: true
   },
   {
     id: 's-001',
@@ -28,7 +32,8 @@ export const products: Product[] = [
     category: 'showers',
     material: 'Stainless Steel',
     finish: 'Matte Black',
-    dimensions: '300mm Diameter'
+    dimensions: '300mm Diameter',
+    featured: true
   },
   {
     id: 'm-001',
@@ -38,7 +43,8 @@ export const products: Product[] = [
     category: 'mirrors',
     material: 'High-Definition Glass',
     finish: 'Frameless',
-    dimensions: '800mm x 600mm'
+    dimensions: '800mm x 600mm',
+    featured: true
   },
   {
     id: 'th-001',

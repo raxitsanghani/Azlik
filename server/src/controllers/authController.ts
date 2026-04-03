@@ -50,7 +50,11 @@ export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user || (user.password && !(await bcrypt.compare(password, user.password)))) {
+    if (!user) {
+      return res.status(401).json({ message: 'Account not found. Please sign up again.' });
+    }
+
+    if (user.password && !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 

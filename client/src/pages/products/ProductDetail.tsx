@@ -2,23 +2,61 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Share2, Ruler, ShieldCheck, Package } from 'lucide-react';
-import { products, Product } from '../../data/products';
+import { Product } from '../../data/products';
+import ProductEnquiryModal from '../../components/enquiry/ProductEnquiryModal';
+import { generateProductPdf } from '../../utils/pdfUtils';
+import { toast } from 'react-toastify';
+import { useProducts } from '../../hooks/useProducts';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
+  const products = useProducts();
+  const [resolved, setResolved] = useState(false);
 
   useEffect(() => {
-    const foundProduct = products.find((p) => p.id === id);
+    if (products.length === 0) return; // wait for load
+    const foundProduct = products.find((p) => p.id === id && (p.status || 'Active') === 'Active');
     if (foundProduct) {
       setProduct(foundProduct);
     } else {
       navigate('/products');
     }
-  }, [id, navigate]);
+    setResolved(true);
+  }, [id, navigate, products]);
+
+  if (!resolved) {
+    return (
+      <div className="min-h-screen pt-24 pb-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-8">
+            <div className="h-6 w-40 bg-premium-charcoal/10" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+              <div className="aspect-[4/5] bg-premium-charcoal/10" />
+              <div className="space-y-4">
+                <div className="h-4 w-28 bg-premium-charcoal/10" />
+                <div className="h-12 w-3/4 bg-premium-charcoal/10" />
+                <div className="h-4 w-full bg-premium-charcoal/10" />
+                <div className="h-4 w-2/3 bg-premium-charcoal/10" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) return null;
+
+  const handleDownloadPdf = async () => {
+    try {
+      await generateProductPdf(product);
+    } catch {
+      toast.error('Failed to generate product PDF');
+    }
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-20 bg-white">
@@ -125,10 +163,18 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="premium-button flex-1 flex items-center justify-center gap-3 min-w-[200px]">
+              <button
+                type="button"
+                className="premium-button flex-1 flex items-center justify-center gap-3 min-w-[200px]"
+                onClick={() => setEnquiryOpen(true)}
+              >
                 Enquire Now
               </button>
-              <button className="premium-btn-outline flex items-center justify-center gap-3">
+              <button
+                type="button"
+                className="premium-btn-outline flex items-center justify-center gap-3"
+                onClick={handleDownloadPdf}
+              >
                 Download PDF
               </button>
             </div>
@@ -143,6 +189,12 @@ const ProductDetail = () => {
           </motion.div>
         </div>
       </div>
+
+      <ProductEnquiryModal
+        product={product}
+        isOpen={enquiryOpen}
+        onClose={() => setEnquiryOpen(false)}
+      />
     </div>
   );
 };

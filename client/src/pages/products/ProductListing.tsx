@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X } from 'lucide-react';
-import { products, Product } from '../../data/products';
+import { Product } from '../../data/products';
+import { useProducts } from '../../hooks/useProducts';
 
 const categories = [
   { id: 'all', name: 'All Collection' },
@@ -25,26 +26,34 @@ const ProductListing = () => {
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(6);
+  const dynamicProducts = useProducts();
+  const allowedCategoryIds = new Set(categories.filter((c) => c.id !== 'all').map((c) => c.id));
 
   useEffect(() => {
     if (urlCategory) {
-      setSelectedCategory(urlCategory);
+      const normalized = urlCategory.toLowerCase();
+      if (!allowedCategoryIds.has(normalized)) {
+        navigate('/products', { replace: true });
+        return;
+      }
+      setSelectedCategory(normalized);
     } else {
       setSelectedCategory('all');
     }
-  }, [urlCategory]);
+  }, [urlCategory, navigate]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+    return dynamicProducts.filter((product) => {
+      const isActive = (product.status || 'Active') === 'Active';
+      const matchesCategory = selectedCategory === 'all' || product.category.toLowerCase() === selectedCategory.toLowerCase();
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            product.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFinish = !selectedFinish || product.finish === selectedFinish;
       const matchesMaterial = !selectedMaterial || product.material === selectedMaterial;
       
-      return matchesCategory && matchesSearch && matchesFinish && matchesMaterial;
+      return isActive && matchesCategory && matchesSearch && matchesFinish && matchesMaterial;
     });
-  }, [selectedCategory, searchQuery, selectedFinish, selectedMaterial]);
+  }, [dynamicProducts, selectedCategory, searchQuery, selectedFinish, selectedMaterial]);
 
   const displayedProducts = filteredProducts.slice(0, visibleCount);
   const hasMore = visibleCount < filteredProducts.length;

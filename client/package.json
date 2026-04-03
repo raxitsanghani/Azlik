@@ -10,14 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.6.8",
+    "clsx": "^2.1.0",
+    "framer-motion": "^11.0.24",
+    "lucide-react": "^0.363.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "react-toastify": "^10.0.5",
-    "framer-motion": "^11.0.24",
-    "lucide-react": "^0.363.0",
-    "axios": "^1.6.8",
-    "clsx": "^2.1.0",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^2.2.2"
   },
   "devDependencies": {
@@ -31,5 +32,8 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
+  },
+  "optionalDependencies": {
+    "jspdf": "^2.5.1"
   }
 }

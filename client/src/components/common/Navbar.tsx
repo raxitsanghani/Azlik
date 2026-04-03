@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
+import Logo from './Logo';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,17 +24,12 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { name: 'Collections', path: '/products' },
-    { name: 'Faucets', path: '/products/faucets' },
-    { name: 'Showers', path: '/products/showers' },
-    { name: 'Mirrors', path: '/products/mirrors' },
-    { name: 'Accessories', path: '/products/accessories' },
+    { name: 'Collections', path: '/collections' },
+    { name: 'Faucets', path: '/faucets' },
+    { name: 'Showers', path: '/showers' },
+    { name: 'Mirrors', path: '/mirrors' },
+    { name: 'Accessories', path: '/accessories' },
   ];
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
-  };
 
   const isHome = location.pathname === '/';
 
@@ -45,25 +41,33 @@ const Navbar: React.FC = () => {
       `}
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo */}
+        {/* Logo Branding */}
         <Link to="/" className="relative z-[110]">
-          <h1 className={`text-2xl font-serif tracking-[0.2em] italic transition-colors duration-500
-            ${!scrolled && isHome ? 'text-white' : 'text-premium-charcoal'}
-          `}>
-            AZLIK
-          </h1>
+          <Logo isDark={scrolled || !isHome} />
         </Link>
 
         {/* Desktop Links */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className={`premium-subheading transition-all duration-300 hover:opacity-100
-                ${!scrolled && isHome ? 'text-white/80 opacity-80' : 'text-premium-charcoal/60 opacity-100'}
-                ${location.pathname === link.path ? '!opacity-100 font-bold' : ''}
-              `}
+              className={[
+                'relative inline-flex items-center justify-center',
+                'uppercase font-bold',
+                'text-[13px] md:text-[14px] tracking-[0.28em]',
+                'transition-colors duration-300',
+                // Underline animation (text-only, no highlight background)
+                'after:absolute after:left-0 after:-bottom-[6px] after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-premium-gold after:transition-transform after:duration-300',
+                'hover:after:scale-x-100',
+                'hover:drop-shadow-[0_0_14px_rgba(201,162,39,0.25)]',
+                // Active state
+                location.pathname === link.path ? 'after:scale-x-100' : '',
+                // Color scheme
+                !scrolled && isHome
+                  ? 'text-[#FFFFFF]/95 hover:text-[#F8F8F6]'
+                  : 'text-premium-charcoal/70 hover:text-premium-charcoal/95',
+              ].join(' ')}
             >
               {link.name}
             </Link>
@@ -73,33 +77,26 @@ const Navbar: React.FC = () => {
         {/* Auth Actions */}
         <div className="hidden md:flex items-center gap-6">
           {isLoggedIn ? (
-            <>
-              <Link 
-                to="/dashboard" 
-                className={`p-2 transition-colors duration-500
-                  ${!scrolled && isHome ? 'text-white hover:text-white/60' : 'text-premium-charcoal hover:text-premium-royal'}
-                `}
-              >
-                <User size={20} />
-              </Link>
-              <button 
-                onClick={handleLogout}
-                className={`p-2 transition-colors duration-500
-                  ${!scrolled && isHome ? 'text-white hover:text-white/60' : 'text-premium-charcoal hover:text-red-600'}
-                `}
-              >
-                <LogOut size={20} />
-              </button>
-            </>
+            <Link 
+              to="/dashboard" 
+              className={`w-11 h-11 rounded-full border flex items-center justify-center transition-all duration-300
+                ${!scrolled && isHome
+                  ? 'text-white border-white/45 bg-premium-charcoal/20 backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:scale-105 hover:shadow-[0_0_18px_rgba(255,255,255,0.32)] hover:border-white/70'
+                  : 'text-premium-charcoal border-premium-charcoal/20 bg-white/70 backdrop-blur-sm shadow-sm hover:scale-105 hover:text-premium-royal hover:border-premium-royal/40 hover:shadow-[0_0_18px_rgba(17,24,39,0.16)]'}
+              `}
+            >
+              <User size={20} />
+            </Link>
           ) : (
             <Link 
               to="/login" 
-              className={`premium-subheading border px-6 py-2 transition-all duration-500
+              className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] font-bold transition-all duration-300
                 ${!scrolled && isHome 
-                  ? 'text-white border-white/20 hover:bg-white hover:text-premium-charcoal' 
-                  : 'text-premium-charcoal border-premium-charcoal/20 hover:bg-premium-charcoal hover:text-white'}
+                  ? 'text-white border-white/45 bg-premium-charcoal/20 backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:scale-105 hover:bg-white hover:text-premium-charcoal hover:border-white'
+                  : 'text-premium-charcoal border-premium-charcoal/20 bg-white/75 backdrop-blur-sm shadow-sm hover:scale-105 hover:bg-premium-charcoal hover:text-white hover:border-premium-charcoal'}
               `}
             >
+              <User size={14} />
               Login
             </Link>
           )}
@@ -129,7 +126,17 @@ const Navbar: React.FC = () => {
               <Link
                 key={link.name}
                 to={link.path}
-                className="font-serif text-3xl tracking-wider text-premium-charcoal hover:text-premium-royal transition-colors"
+                className={[
+                  'font-serif',
+                  'text-3xl tracking-wider',
+                  'text-premium-charcoal',
+                  'transition-colors duration-300',
+                  // text-only underline on hover
+                  'relative inline-flex items-center justify-center',
+                  'after:absolute after:left-0 after:-bottom-[10px] after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-premium-gold after:transition-transform after:duration-300',
+                  'hover:after:scale-x-100',
+                  'hover:text-premium-royal',
+                ].join(' ')}
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}
@@ -139,10 +146,16 @@ const Navbar: React.FC = () => {
             {isLoggedIn ? (
               <>
                 <Link to="/dashboard" className="premium-subheading text-premium-charcoal" onClick={() => setIsOpen(false)}>Dashboard</Link>
-                <button onClick={handleLogout} className="premium-subheading text-red-600">Logout</button>
               </>
             ) : (
-              <Link to="/login" className="premium-subheading text-premium-charcoal" onClick={() => setIsOpen(false)}>Login Account</Link>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-premium-charcoal/20 px-5 py-2.5 text-[11px] uppercase tracking-[0.22em] font-bold text-premium-charcoal hover:bg-premium-charcoal hover:text-white transition-all duration-300"
+                onClick={() => setIsOpen(false)}
+              >
+                <User size={14} />
+                Login
+              </Link>
             )}
           </motion.div>
         )}

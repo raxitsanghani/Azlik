@@ -3,10 +3,14 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { products } from '../../data/products';
+import { useProducts } from '../../hooks/useProducts';
 
 const ProductCarousel: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const products = useProducts();
+  const activeProducts = products.filter((product) => (product.status || 'Active') === 'Active');
+  const featuredProducts = activeProducts.filter((product) => product.featured);
+  const visibleProducts = featuredProducts.length > 0 ? featuredProducts : activeProducts;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -44,7 +48,7 @@ const ProductCarousel: React.FC = () => {
         className="flex overflow-x-auto gap-8 px-6 md:px-[10%] no-scrollbar snap-x snap-mandatory pb-12"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {products.map((product) => (
+        {visibleProducts.map((product) => (
           <Link 
             key={product.id}
             to={`/product/${product.id}`}

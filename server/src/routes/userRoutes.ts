@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { getProfile, updateProfile, changePassword, uploadAvatar } from '../controllers/userController';
+import { getProfile, updateProfile, changePassword, uploadAvatar, getAllUsers, deleteUser } from '../controllers/userController';
 import { protect } from '../middleware/authMiddleware';
 import multer from 'multer';
 import path from 'path';
@@ -38,5 +38,7 @@ router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
 router.post('/avatar', protect, upload.single('avatar'), uploadAvatar);
 router.put('/change-password', protect, changePassword);
+router.get('/all', getAllUsers);
+router.delete('/:id', deleteUser);
 
 export default router;
