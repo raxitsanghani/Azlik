@@ -24,9 +24,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('adminToken'); // Cleanup legacy keys if any
     localStorage.removeItem('adminUser');
-    toast.success('Admin logged out successfully');
+    toast.success('Logged out successfully');
     navigate('/login');
   };
 
@@ -121,10 +123,12 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </button>
             <div className="flex items-center gap-3 pl-6 border-l border-gray-100">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-200 to-gray-100 flex items-center justify-center text-premium-charcoal font-bold border border-gray-200">
-                A
+                {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).name.charAt(0).toUpperCase() : 'A'}
               </div>
               <div className="hidden md:block">
-                <p className="text-sm font-bold text-premium-charcoal">Azlik Admin</p>
+                <p className="text-sm font-bold text-premium-charcoal">
+                  {localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).name : 'Admin'}
+                </p>
                 <p className="text-xs text-gray-400">Super Administrator</p>
               </div>
             </div>

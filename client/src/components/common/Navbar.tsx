@@ -24,11 +24,12 @@ const Navbar: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { name: 'Collections', path: '/collections' },
-    { name: 'Faucets', path: '/faucets' },
-    { name: 'Showers', path: '/showers' },
-    { name: 'Mirrors', path: '/mirrors' },
-    { name: 'Accessories', path: '/accessories' },
+    { name: 'Collections', path: '/products' },
+    { name: 'About', path: '/about' },
+    { name: 'Faucets', path: '/products/faucets' },
+    { name: 'Showers', path: '/products/showers' },
+    { name: 'Mirrors', path: '/products/mirrors' },
+    { name: 'Accessories', path: '/products/accessories' },
   ];
 
   const isHome = location.pathname === '/';

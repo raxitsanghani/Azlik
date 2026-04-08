@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Trash2, Mail, Shield, User } from 'lucide-react';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { userService } from '../../api/apiService';
 import AdminLayout from '../../components/admin/AdminLayout';
 
 const AdminUsers = () => {
@@ -12,7 +12,7 @@ const AdminUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:2112/api/user/all');
+        const response = await userService.getAllUsers();
         if (response.data) {
            setUsers(response.data);
         }
@@ -30,8 +30,8 @@ const AdminUsers = () => {
   const handleDelete = async (id: string) => {
     if(window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await axios.delete(`http://localhost:2112/api/user/${id}`);
-        setUsers(users.filter(u => u._id !== id));
+        await userService.deleteUser(id);
+        setUsers(users.filter(u => u._id !== id || u.id !== id));
         toast.success('User permanently deleted');
       } catch (error) {
         toast.error('Failed to delete user');

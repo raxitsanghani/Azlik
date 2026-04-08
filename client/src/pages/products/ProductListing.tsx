@@ -5,34 +5,44 @@ import { Search, Filter, X } from 'lucide-react';
 import { Product } from '../../data/products';
 import { useProducts } from '../../hooks/useProducts';
 
-const categories = [
-  { id: 'all', name: 'All Collection' },
-  { id: 'faucets', name: 'Premium Faucets' },
-  { id: 'showers', name: 'Luxury Showers' },
-  { id: 'mirrors', name: 'Smart Mirrors' },
-  { id: 'towel-holders', name: 'Towel Holders' },
-  { id: 'accessories', name: 'Accessories' },
-];
-
-const finishes = ['Brushed Gold', 'Matte Black', 'Chrome', 'Gunmetal Grey', 'Stainless Steel', 'Marble Texture'];
-const materials = ['Solid Brass', 'Stainless Steel', 'High-Definition Glass', 'Zinc Alloy', 'Ceramic'];
-
 const ProductListing = () => {
   const { category: urlCategory } = useParams<{ category?: string }>();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const dynamicProducts = useProducts();
+  
   const [selectedCategory, setSelectedCategory] = useState(urlCategory || 'all');
   const [selectedFinish, setSelectedFinish] = useState<string | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
+  const [selectedDimensions, setSelectedDimensions] = useState<string | null>(null);
+  const [showOnlyFeatured, setShowOnlyFeatured] = useState<boolean>(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(6);
-  const dynamicProducts = useProducts();
-  const allowedCategoryIds = new Set(categories.filter((c) => c.id !== 'all').map((c) => c.id));
+
+  // Dynamically derive categories from active products
+  const categories = useMemo(() => {
+    const cats = new Set(dynamicProducts.map(p => p.category.toLowerCase()));
+    const list = [
+      { id: 'all', name: 'All Collection' },
+      ...Array.from(cats).map(cat => ({
+        id: cat,
+        name: cat.charAt(0).toUpperCase() + cat.slice(1)
+      }))
+    ];
+    return list;
+  }, [dynamicProducts]);
+
+  // Dynamically derive finishes and materials
+  const finishes = useMemo(() => Array.from(new Set(dynamicProducts.map(p => p.finish).filter(Boolean))), [dynamicProducts]);
+  const materials = useMemo(() => Array.from(new Set(dynamicProducts.map(p => p.material).filter(Boolean))), [dynamicProducts]);
+  const dimensions = useMemo(() => Array.from(new Set(dynamicProducts.map(p => p.dimensions).filter(Boolean))), [dynamicProducts]);
+
+  const allowedCategoryIds = useMemo(() => new Set(categories.map(c => c.id)), [categories]);
 
   useEffect(() => {
     if (urlCategory) {
       const normalized = urlCategory.toLowerCase();
-      if (!allowedCategoryIds.has(normalized)) {
+      if (allowedCategoryIds.size > 1 && !allowedCategoryIds.has(normalized)) {
         navigate('/products', { replace: true });
         return;
       }
@@ -40,7 +50,7 @@ const ProductListing = () => {
     } else {
       setSelectedCategory('all');
     }
-  }, [urlCategory, navigate]);
+  }, [urlCategory, navigate, allowedCategoryIds]);
 
   const filteredProducts = useMemo(() => {
     return dynamicProducts.filter((product) => {
@@ -50,8 +60,10 @@ const ProductListing = () => {
                            product.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFinish = !selectedFinish || product.finish === selectedFinish;
       const matchesMaterial = !selectedMaterial || product.material === selectedMaterial;
+      const matchesDimensions = !selectedDimensions || product.dimensions === selectedDimensions;
+      const matchesFeatured = !showOnlyFeatured || product.featured === true;
       
-      return isActive && matchesCategory && matchesSearch && matchesFinish && matchesMaterial;
+      return isActive && matchesCategory && matchesSearch && matchesFinish && matchesMaterial && matchesDimensions && matchesFeatured;
     });
   }, [dynamicProducts, selectedCategory, searchQuery, selectedFinish, selectedMaterial]);
 
@@ -70,67 +82,40 @@ const ProductListing = () => {
     setSearchQuery('');
     setSelectedFinish(null);
     setSelectedMaterial(null);
+    setSelectedDimensions(null);
+    setShowOnlyFeatured(false);
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto mb-16 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="premium-subheading mb-4 block">Exquisite Collection</span>
-          <h1 className="premium-heading text-5xl md:text-7xl mb-6">Our Products</h1>
-          <p className="max-w-2xl mx-auto text-premium-charcoal/60 font-light leading-relaxed">
-            Discover our curated range of premium bathroom accessories, designed to transform your 
-            private sanctuary into a masterpiece of modern luxury.
-          </p>
-        </motion.div>
-      </section>
+    <div className="min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8">
 
-      {/* Controls Section */}
       <section className="max-w-7xl mx-auto mb-10">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-premium-charcoal/10 pb-8">
-          {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`px-6 py-2 text-[11px] uppercase tracking-[0.2em] font-medium transition-all duration-300 whitespace-nowrap
-                  ${selectedCategory === cat.id 
-                    ? 'bg-premium-charcoal text-white' 
-                    : 'bg-white/50 text-premium-charcoal hover:bg-premium-charcoal/5'}
-                `}
-              >
-                {cat.name}
-              </button>
-            ))}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-premium-charcoal/10 pb-8">
+          <div className="flex items-center gap-4">
+            <h1 className="font-serif text-3xl md:text-4xl">Products</h1>
+            <div className="w-12 h-[1px] bg-premium-charcoal/15 hidden md:block" />
           </div>
 
-          {/* Search & Global Filter Toggle */}
-          <div className="flex items-center gap-4">
-            <div className="relative group">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="relative group flex-1 md:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-premium-charcoal/40 group-focus-within:text-premium-charcoal transition-colors" />
               <input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white/50 border border-premium-charcoal/10 focus:border-premium-charcoal focus:outline-none text-[13px] w-full lg:w-64 transition-all"
+                className="pl-10 pr-4 py-2 bg-white border border-premium-charcoal/10 focus:border-premium-charcoal focus:outline-none text-[13px] w-full md:w-64 transition-all"
               />
             </div>
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center gap-2 px-4 py-2 border border-premium-charcoal/10 text-[11px] uppercase tracking-widest font-bold transition-all
+              className={`flex items-center gap-2 px-6 py-2 border border-premium-charcoal text-[11px] uppercase tracking-widest font-bold transition-all
                 ${isFilterOpen ? 'bg-premium-charcoal text-white' : 'hover:bg-premium-charcoal/5'}
               `}
             >
               <Filter className="w-4 h-4" />
               Filters
-              {(selectedFinish || selectedMaterial) && (
+              {(selectedCategory !== 'all' || selectedFinish || selectedMaterial || selectedDimensions || showOnlyFeatured) && (
                 <span className="w-2 h-2 bg-premium-royal rounded-full"></span>
               )}
             </button>
@@ -147,15 +132,32 @@ const ProductListing = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden bg-white/30 backdrop-blur-sm border-x border-b border-premium-charcoal/10"
             >
-              <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div>
+                  <h4 className="premium-subheading mb-4">By Category</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => handleCategoryChange(cat.id)}
+                        className={`px-3 py-1 text-[10px] border transition-all uppercase tracking-widest
+                          ${selectedCategory === cat.id 
+                            ? 'border-premium-charcoal bg-premium-charcoal text-white' 
+                            : 'border-premium-charcoal/10 hover:border-premium-charcoal'}
+                        `}
+                      >
+                        {cat.name.replace('All Collection', 'All')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div>
                   <h4 className="premium-subheading mb-4">By Finish</h4>
                   <div className="flex flex-wrap gap-2">
-                    {finishes.map((f) => (
+                    {finishes.map((f: string) => (
                       <button
                         key={f}
                         onClick={() => setSelectedFinish(selectedFinish === f ? null : f)}
-                        className={`px-3 py-1 text-[10px] border transition-all
+                        className={`px-3 py-1 text-[10px] border transition-all uppercase tracking-widest
                           ${selectedFinish === f 
                             ? 'border-premium-charcoal bg-premium-charcoal text-white' 
                             : 'border-premium-charcoal/10 hover:border-premium-charcoal'}
@@ -169,11 +171,11 @@ const ProductListing = () => {
                 <div>
                   <h4 className="premium-subheading mb-4">By Material</h4>
                   <div className="flex flex-wrap gap-2">
-                    {materials.map((m) => (
+                    {materials.map((m: string) => (
                       <button
                         key={m}
                         onClick={() => setSelectedMaterial(selectedMaterial === m ? null : m)}
-                        className={`px-3 py-1 text-[10px] border transition-all
+                        className={`px-3 py-1 text-[10px] border transition-all uppercase tracking-widest
                           ${selectedMaterial === m 
                             ? 'border-premium-charcoal bg-premium-charcoal text-white' 
                             : 'border-premium-charcoal/10 hover:border-premium-charcoal'}
@@ -184,16 +186,54 @@ const ProductListing = () => {
                     ))}
                   </div>
                 </div>
-                <div className="flex items-end justify-end">
+                <div>
+                  <h4 className="premium-subheading mb-4">By Dimensions</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {dimensions.map((d: string) => (
+                      <button
+                        key={d}
+                        onClick={() => setSelectedDimensions(selectedDimensions === d ? null : d)}
+                        className={`px-3 py-1 text-[10px] border transition-all uppercase tracking-widest
+                          ${selectedDimensions === d 
+                            ? 'border-premium-charcoal bg-premium-charcoal text-white' 
+                            : 'border-premium-charcoal/10 hover:border-premium-charcoal'}
+                        `}
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="premium-subheading mb-4">Special</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setShowOnlyFeatured(!showOnlyFeatured)}
+                      className={`px-4 py-2 text-[10px] border transition-all uppercase tracking-widest font-bold
+                        ${showOnlyFeatured 
+                          ? 'border-premium-royal bg-premium-royal text-white' 
+                          : 'border-premium-charcoal/10 hover:border-premium-royal text-premium-charcoal/60'}
+                      `}
+                    >
+                      ★ Featured Only
+                    </button>
+                  </div>
+                </div>
+                <div className="md:col-span-2 lg:col-span-3 flex justify-end gap-6 mt-4 pt-6 border-t border-premium-charcoal/10">
                   <button
                     onClick={clearFilters}
-                    className="text-[10px] uppercase tracking-widest font-bold text-premium-charcoal/40 hover:text-red-600 flex items-center gap-2"
+                    className="text-[10px] uppercase tracking-widest font-bold text-premium-charcoal/40 hover:text-red-600 flex items-center gap-2 transition-colors"
                   >
                     <X className="w-3 h-3" />
                     Reset All Filters
                   </button>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="text-[10px] uppercase tracking-widest font-bold text-premium-charcoal hover:text-premium-royal transition-colors"
+                  >
+                    Close
+                  </button>
                 </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -224,9 +264,10 @@ const ProductListing = () => {
                   <Link to={`/product/${product.id}`} className="block">
                     <div className="premium-card overflow-hidden relative aspect-[4/5] mb-6">
                       <img
-                        src={product.image}
+                        src={product.image || (product.images && product.images[0]) || '/placeholder-product.jpg'}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
                       />
                       <div className="absolute inset-0 bg-premium-charcoal/0 group-hover:bg-premium-charcoal/10 transition-colors duration-500" />
                       <div className="absolute top-4 left-4">

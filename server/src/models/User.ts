@@ -13,6 +13,7 @@ export interface IUser extends Document {
   lastLogin?: Date;
   enquiriesCount?: number;
   savedProductsCount?: number;
+  role: 'user' | 'admin';
   createdAt: Date;
 }
 
@@ -29,6 +30,7 @@ const UserSchema: Schema = new Schema({
   lastLogin: { type: Date },
   enquiriesCount: { type: Number, default: 0 },
   savedProductsCount: { type: Number, default: 0 },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -6,26 +6,37 @@ import { Product } from '../../data/products';
 import ProductEnquiryModal from '../../components/enquiry/ProductEnquiryModal';
 import { generateProductPdf } from '../../utils/pdfUtils';
 import { toast } from 'react-toastify';
-import { useProducts } from '../../hooks/useProducts';
+import { productService } from '../../api/apiService';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [enquiryOpen, setEnquiryOpen] = useState(false);
-  const products = useProducts();
   const [resolved, setResolved] = useState(false);
+  const [activeImage, setActiveImage] = useState<string>('');
 
   useEffect(() => {
-    if (products.length === 0) return; // wait for load
-    const foundProduct = products.find((p) => p.id === id && (p.status || 'Active') === 'Active');
-    if (foundProduct) {
-      setProduct(foundProduct);
-    } else {
-      navigate('/products');
-    }
-    setResolved(true);
-  }, [id, navigate, products]);
+    const fetchProduct = async () => {
+      if (!id) return;
+      try {
+        const response = await productService.getById(id);
+        const data = response.data;
+        setProduct({
+          ...data,
+          id: data._id || data.id
+        });
+        setActiveImage(data.image || (data.images && data.images[0]) || '/placeholder-product.jpg');
+      } catch (err: any) {
+        console.error('Failed to fetch product:', err);
+        navigate('/products');
+      } finally {
+        setResolved(true);
+      }
+    };
+
+    fetchProduct();
+  }, [id, navigate]);
 
   if (!resolved) {
     return (
@@ -77,30 +88,33 @@ const ProductDetail = () => {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
-            <div className="premium-card aspect-[4/5] overflow-hidden">
+            <div className="premium-card aspect-[4/5] overflow-hidden bg-gray-50">
               <img 
-                src={product.image} 
+                src={activeImage || product.image || '/placeholder-product.jpg'} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform duration-[1.5s] hover:scale-105"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="aspect-square bg-premium-ivory overflow-hidden premium-card">
-                <img 
-                  src={product.image} 
-                  alt="detail 1" 
-                  className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity"
-                />
+            {(product.images && product.images.length > 0) && (
+              <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                {product.images.map((imgUrl, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => setActiveImage(imgUrl)}
+                    className={`shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-premium-ivory overflow-hidden premium-card border-2 transition-all duration-300 ${activeImage === imgUrl ? 'border-premium-charcoal opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  >
+                    <img 
+                      src={imgUrl} 
+                      alt={`detail ${idx + 1}`} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
+                    />
+                  </button>
+                ))}
               </div>
-              <div className="aspect-square bg-premium-ivory overflow-hidden premium-card">
-                <img 
-                  src={product.image}
-                  alt="detail 2" 
-                  className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity grayscale"
-                />
-              </div>
-            </div>
+            )}
           </motion.div>
 
           {/* Right: Product Details */}

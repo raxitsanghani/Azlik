@@ -181,9 +181,9 @@ const SecurityCard: React.FC = () => {
             <div className="pt-4">
               <div className="flex items-center gap-2 text-premium-charcoal/40 mb-1">
                 <Clock size={12} />
-                <span className="text-[10px] uppercase tracking-widest font-bold">Last Login</span>
+                <span className="text-[10px] uppercase tracking-widest font-bold">Account Status</span>
               </div>
-              <p className="text-xs font-light">Today, March 13, 2026 at 12:45 PM</p>
+              <p className="text-xs font-light">Verified Premium Member</p>
             </div>
           </div>
         )}

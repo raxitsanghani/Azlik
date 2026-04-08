@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AuthLayout from '../../components/AuthLayout';
-import axios from 'axios';
+import { authService, API_URL } from '../../api/apiService';
 import PageLayout from '../../components/common/PageLayout';
 
 const Signup = () => {
@@ -20,7 +20,7 @@ const Signup = () => {
 
   const handleGoogleLogin = () => {
     setLoading(true);
-    window.location.href = 'http://localhost:2112/api/auth/google';
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +31,7 @@ const Signup = () => {
     
     setLoading(true);
     try {
-      await axios.post('http://localhost:2112/api/auth/signup', formData);
+      await authService.signup(formData);
       toast.success("Account created successfully!");
       navigate('/login');
     } catch (error: any) {

@@ -22,11 +22,12 @@ const HeroBackground: React.FC<HeroBackgroundProps> = ({ imageSrc, imageAlt }) =
         className="w-full h-full object-cover"
       />
 
-      {/* Luxury vignette + dark gradient for guaranteed text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-t from-premium-charcoal/90 via-premium-charcoal/55 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-premium-charcoal/80 via-premium-charcoal/20 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_25%,rgba(201,162,39,0.22)_0%,transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_60%,rgba(14,165,233,0.06)_0%,transparent_50%)]" />
+      {/* Luxury vignette + left-heavy gradient for perfect text contrast */}
+      <div className="absolute inset-0 bg-premium-charcoal/40" />
+      <div className="absolute inset-0 bg-gradient-to-r from-premium-charcoal/95 via-premium-charcoal/60 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-premium-charcoal/80 via-premium-charcoal/10 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-premium-charcoal/60 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_40%,rgba(201,162,39,0.15)_0%,transparent_60%)]" />
     </motion.div>
   );
 };

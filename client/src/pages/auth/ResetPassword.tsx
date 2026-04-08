@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Lock, CheckCircle, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AuthLayout from '../../components/AuthLayout';
-import axios from 'axios';
+import { authService } from '../../api/apiService';
 
 const ResetPassword = () => {
   const [formData, setFormData] = useState({ password: '', confirmPassword: '' });
@@ -32,7 +32,7 @@ const ResetPassword = () => {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:2112/api/auth/reset-password', { 
+      await authService.resetPassword({ 
         email, 
         otp, 
         password: formData.password,

@@ -12,7 +12,8 @@ import {
   BarChart, Bar
 } from 'recharts';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { useProducts } from '../../hooks/useProducts';
+import { adminService } from '../../api/apiService';
+import { useEffect, useState } from 'react';
 
 // Mock Premium Data
 const visitorData = [
@@ -59,7 +60,19 @@ const StatCard = ({ title, value, icon: Icon, trend, trendValue, delay }: any) =
 };
 
 const AdminDashboard = () => {
-  const dynamicProducts = useProducts();
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await adminService.getStats();
+        setStats(response.data);
+      } catch (err) {
+        console.error('Failed to fetch admin stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <AdminLayout>
@@ -69,10 +82,38 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Visitors" value="24,592" icon={Eye} trend="up" trendValue="12.5%" delay={0.1} />
-        <StatCard title="Total Enquiries" value="1,204" icon={MessageSquare} trend="up" trendValue="8.2%" delay={0.2} />
-        <StatCard title="Total Products" value={dynamicProducts.length.toString()} icon={Package} trend="up" trendValue="3.1%" delay={0.3} />
-        <StatCard title="Active Users" value="8,921" icon={Users} trend="down" trendValue="1.4%" delay={0.4} />
+        <StatCard 
+          title="Total Visitors" 
+          value={stats?.totalVisitors?.toLocaleString() || '...'} 
+          icon={Eye} 
+          trend="up" 
+          trendValue={stats?.trends?.visitors || '...'} 
+          delay={0.1} 
+        />
+        <StatCard 
+          title="Total Enquiries" 
+          value={stats?.totalEnquiries?.toString() || '...'} 
+          icon={MessageSquare} 
+          trend="up" 
+          trendValue={stats?.trends?.enquiries || '...'} 
+          delay={0.2} 
+        />
+        <StatCard 
+          title="Total Products" 
+          value={stats?.totalProducts?.toString() || '...'} 
+          icon={Package} 
+          trend="up" 
+          trendValue={stats?.trends?.products || '...'} 
+          delay={0.3} 
+        />
+        <StatCard 
+          title="Active Users" 
+          value={stats?.totalUsers?.toString() || '...'} 
+          icon={Users} 
+          trend="down" 
+          trendValue={stats?.trends?.users || '...'} 
+          delay={0.4} 
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -94,8 +135,8 @@ const AdminDashboard = () => {
               <option>This Year</option>
             </select>
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full min-h-[300px] mt-4" style={{ height: 300 }}>
+            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <AreaChart data={visitorData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
@@ -127,8 +168,8 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-bold text-premium-charcoal">Category Views</h3>
             <p className="text-sm text-gray-500">Most popular product categories</p>
           </div>
-          <div className="flex-1 min-h-[250px]">
-             <ResponsiveContainer width="100%" height="100%">
+          <div className="flex-1 min-h-[300px] mt-4 w-full" style={{ height: 300 }}>
+             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
               <BarChart data={categoryData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                 <XAxis type="number" hide />

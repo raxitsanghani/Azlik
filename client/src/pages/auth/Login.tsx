@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AuthLayout from '../../components/AuthLayout';
-import axios from 'axios';
+import { authService, API_URL } from '../../api/apiService';
 import PageLayout from '../../components/common/PageLayout';
 
 const Login = () => {
@@ -30,9 +30,12 @@ const Login = () => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
 
-        // Navigation only (OAuth redirect): no success toast for a clean/premium UX.
-        // Redirect to Home Page instead of Dashboard
-        navigate('/', { replace: true });
+        // Redirect to Admin Dashboard if admin, else Home
+        if (user.role === 'admin') {
+          navigate('/admin-dashboard', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
       } catch (err) {
         console.error('Error parsing user data:', err);
       }
@@ -47,36 +50,15 @@ const Login = () => {
 
   const handleGoogleLogin = () => {
     setLoading(true);
-    window.location.href = 'http://localhost:2112/api/auth/google';
+    window.location.href = `${API_URL}/auth/google`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Admin Access Logic
-    if (formData.email === 'azlikadmin@gmail.com' && formData.password === 'azlikadmin21') {
-      const adminUser = {
-        name: 'Azlik Admin',
-        email: 'azlikadmin@gmail.com',
-        role: 'admin',
-        id: 'admin_123'
-      };
-      
-      // Create admin session
-      localStorage.setItem('adminToken', 'premium_admin_token_xyz');
-      localStorage.setItem('adminUser', JSON.stringify(adminUser));
-      
-      toast.success('Admin login successful. Opening dashboard...', { toastId: 'admin-login-success' });
-      
-      setTimeout(() => {
-        navigate('/admin-dashboard', { replace: true });
-      }, 500);
-      return;
-    }
-
     try {
-      const response = await axios.post('http://localhost:2112/api/auth/login', formData);
+      const response = await authService.login(formData);
       const { user, token } = response.data;
       
       localStorage.setItem('token', token);
@@ -84,8 +66,12 @@ const Login = () => {
 
       toast.success(`Login successful. Welcome back, ${user.email}`, { toastId: 'login-success' });
       
-      // Redirect to Home Page instead of Dashboard
-      navigate('/', { replace: true });
+      // Redirect to Admin Dashboard if admin, else Home
+      if (user.role === 'admin') {
+        navigate('/admin-dashboard', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Invalid credentials', { toastId: 'login-error' });
     } finally {

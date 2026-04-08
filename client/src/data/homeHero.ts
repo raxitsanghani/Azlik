@@ -12,6 +12,10 @@ export type HomeHeroConfig = {
     imageSrc: string;
     imageAlt: string;
   };
+  showcaseImage?: {
+    imageSrc: string;
+    imageAlt: string;
+  };
   content: HomeHeroContent;
 };
 
@@ -21,13 +25,17 @@ export type HomeHeroConfig = {
 export const homeHero: HomeHeroConfig = {
   background: {
     imageSrc: "/hero_bathroom_sanctuary.png",
-    imageAlt: "Luxury bathroom sanctuary",
+    imageAlt: "Luxury bathroom showroom",
+  },
+  showcaseImage: {
+    imageSrc: "/luxury_showcase_right_card.png",
+    imageAlt: "Premium golden faucet and luxury bathroom accessories showcase",
   },
   content: {
-    subheading: "Premium Bathroom Accessories",
-    heading: "Elevating Your Bathroom",
-    headingEmphasis: "Sanctuary",
-    description: "Luxury fittings crafted for modern interiors",
+    subheading: "Premium Brand",
+    heading: "Make Your Bathroom Amazing",
+    headingEmphasis: "",
+    description: "Luxury bathroom accessories crafted for modern interiors.",
     primaryCta: { label: "Explore Collections", to: "/products" },
     secondaryCta: { label: "Send Enquiry", to: "/enquiries" },
   },

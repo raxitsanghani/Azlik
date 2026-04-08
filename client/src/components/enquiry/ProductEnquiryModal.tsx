@@ -110,9 +110,10 @@ const ProductEnquiryModal: React.FC<ProductEnquiryModalProps> = ({
               </div>
               <div className="mt-6 aspect-video rounded-sm overflow-hidden bg-premium-ivory/10 border border-white/10">
                 <img
-                  src={product.image}
+                  src={product.image || (product.images && product.images[0]) || '/placeholder-product.jpg'}
                   alt={product.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
                 />
               </div>
             </div>

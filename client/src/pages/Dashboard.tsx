@@ -64,7 +64,7 @@ const Dashboard = () => {
           </Link>
           <p className="premium-subheading mb-2">My Account</p>
           <h1 className="premium-heading text-4xl md:text-5xl lg:text-6xl mb-4">
-            Welcome back, <span className="italic">{userData.name.split(' ')[0]}</span>
+            Welcome back, <span className="italic">{userData.name?.split(' ')[0] || 'User'}</span>
           </h1>
           <p className="text-premium-charcoal/60 font-light tracking-wide max-w-md">
             Manage your premium bathroom collections, account security, and personal preferences.

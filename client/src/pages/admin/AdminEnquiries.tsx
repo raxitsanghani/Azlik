@@ -9,29 +9,30 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AdminLayout from '../../components/admin/AdminLayout';
-
-// Mock Enquiries
-const initialEnquiries = [
-  { id: '1', name: 'John Doe', email: 'john@example.com', phone: '+1 234 567 890', city: 'New York', product: 'Premium Brass Faucet', date: '2026-04-01', status: 'Pending' },
-  { id: '2', name: 'Sarah Smith', email: 'sarah@example.com', phone: '+1 987 654 321', city: 'London', product: 'LED Smart Mirror', date: '2026-04-02', status: 'Resolved' },
-  { id: '3', name: 'Michael Chen', email: 'mike@example.com', phone: '+1 555 123 456', city: 'San Francisco', product: 'Rainfall Shower Head', date: '2026-04-02', status: 'Pending' },
-  { id: '4', name: 'Emma Wilson', email: 'emma@example.com', phone: '+1 444 789 012', city: 'Toronto', product: 'Freestanding Stone Tub', date: '2026-04-03', status: 'Pending' },
-];
+import { enquiryService } from '../../api/apiService';
 
 const AdminEnquiries = () => {
-  const [enquiries, setEnquiries] = useState(() => {
-    const saved = localStorage.getItem('azlik_enquiries');
-    return saved ? JSON.parse(saved) : initialEnquiries;
-  });
+  const [enquiries, setEnquiries] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem('azlik_enquiries', JSON.stringify(enquiries));
-  }, [enquiries]);
+  const fetchEnquiries = async () => {
+    try {
+      const response = await enquiryService.getAll();
+      setEnquiries(response.data);
+    } catch (error) {
+      console.error('Failed to fetch enquiries:', error);
+    }
+  };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
-    setEnquiries(enquiries.map(e => e.id === id ? { ...e, status: newStatus } : e));
+  useEffect(() => {
+    fetchEnquiries();
+  }, []);
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    // Note: We'll assume for now that status change is a simple mock or we can add an endpoint later
+    // For now, let's just toast
     toast.success(`Enquiry marked as ${newStatus}`);
+    setEnquiries(enquiries.map(e => e._id === id || e.id === id ? { ...e, status: newStatus } : e));
   };
 
   const handleDelete = (id: string) => {
@@ -42,9 +43,9 @@ const AdminEnquiries = () => {
   };
 
   const filteredEnquiries = enquiries.filter(e => 
-    e.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (e.fullName || e.name).toLowerCase().includes(searchTerm.toLowerCase()) || 
     e.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    e.product.toLowerCase().includes(searchTerm.toLowerCase())
+    (e.message || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -86,17 +87,17 @@ const AdminEnquiries = () => {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredEnquiries.map((enq) => (
-                <tr key={enq.id} className={`hover:bg-gray-50/50 transition-colors group ${enq.status === 'Pending' ? 'bg-white' : 'bg-gray-50/30'}`}>
+                <tr key={enq._id || enq.id} className={`hover:bg-gray-50/50 transition-colors group ${enq.status === 'Pending' ? 'bg-white' : 'bg-gray-50/30'}`}>
                   <td className="p-4 pl-6">
-                    <div className="font-bold text-premium-charcoal">{enq.name}</div>
+                    <div className="font-bold text-premium-charcoal">{enq.fullName || enq.name}</div>
                     <div className="text-sm text-gray-400">{enq.city}</div>
                   </td>
                   <td className="p-4">
                     <div className="text-sm text-gray-600 font-medium">{enq.email}</div>
                     <div className="text-sm text-gray-400">{enq.phone}</div>
                   </td>
-                  <td className="p-4 text-sm font-bold text-premium-charcoal">{enq.product}</td>
-                  <td className="p-4 text-sm text-gray-500">{enq.date}</td>
+                  <td className="p-4 text-sm font-bold text-premium-charcoal">{enq.product?.name || enq.product || 'Product Enquiry'}</td>
+                  <td className="p-4 text-sm text-gray-500">{new Date(enq.createdAt || enq.date).toLocaleDateString()}</td>
                   <td className="p-4">
                     <span className={`flex items-center gap-1.5 w-fit px-3 py-1 rounded-full text-xs font-bold tracking-wide 
                       ${enq.status === 'Resolved' ? 'bg-green-50 text-green-600' : 'bg-yellow-50 text-yellow-600'}

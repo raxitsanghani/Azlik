@@ -12,8 +12,8 @@ const Hero: React.FC = () => {
         imageAlt={homeHero.background.imageAlt}
       />
 
-      <div className="relative z-10 min-h-[90vh] flex items-center">
-        <HeroContent content={homeHero.content} />
+      <div className="relative z-10 min-h-[90vh] flex items-center w-full">
+        <HeroContent content={homeHero.content} showcaseImage={homeHero.showcaseImage} />
       </div>
     </section>
   );

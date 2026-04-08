@@ -6,6 +6,8 @@ import BrandStory from '../components/home/BrandStory';
 import ProductCarousel from '../components/home/ProductCarousel';
 import Footer from '../components/home/Footer';
 import { motion, useScroll, useSpring } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import PageLayout from '../components/common/PageLayout';
 
 const Home: React.FC = () => {
@@ -38,6 +40,16 @@ const Home: React.FC = () => {
         <main>
           <div id="hero"><Hero /></div>
           <div id="collections"><Collections /></div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="bg-premium-ivory py-24 text-center"
+          >
+            <Link to="/about" className="premium-btn-outline group">
+              Discover Our Heritage <ArrowRight size={14} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </motion.div>
           <div id="story"><BrandStory /></div>
           <WhyChooseUs />
           <div id="showcase"><ProductCarousel /></div>

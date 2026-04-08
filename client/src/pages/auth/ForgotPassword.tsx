@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AuthLayout from '../../components/AuthLayout';
-import axios from 'axios';
+import { authService } from '../../api/apiService';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:2112/api/auth/forgot-password', { email });
+      await authService.forgotPassword({ email });
       toast.info("OTP sent to your email address");
       localStorage.setItem('resetEmail', email);
       navigate('/verify-otp');

@@ -60,9 +60,10 @@ const ProductCarousel: React.FC = () => {
             >
               <div className="aspect-[4/5] bg-premium-ivory relative overflow-hidden mb-6 rounded-sm shadow-lg group-hover:shadow-2xl transition-shadow duration-500">
                 <img 
-                  src={product.image} 
+                  src={product.image || (product.images && product.images[0]) || '/placeholder-product.jpg'} 
                   alt={product.name} 
                   className="w-full h-full object-cover transition-all duration-700"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
                 />
                 <div className="absolute top-4 left-4">
                   <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold text-premium-charcoal shadow-sm">

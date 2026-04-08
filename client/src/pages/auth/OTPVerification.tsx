@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, ArrowLeft } from 'lucide-react';
 import { toast } from 'react-toastify';
 import AuthLayout from '../../components/AuthLayout';
-import axios from 'axios';
+import { authService } from '../../api/apiService';
 
 const OTPVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -35,7 +35,7 @@ const OTPVerification = () => {
 
     setLoading(true);
     try {
-      await axios.post('http://localhost:2112/api/auth/verify-otp', { email, otp: otpValue });
+      await authService.verifyOtp({ email, otp: otpValue });
       toast.success("OTP Verified Successfully!");
       localStorage.setItem('verifiedOtp', otpValue);
       navigate('/reset-password');

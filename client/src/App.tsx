@@ -12,14 +12,9 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductListing from './pages/products/ProductListing';
 import ProductDetail from './pages/products/ProductDetail';
-import CollectionsPage from './pages/categories/CollectionsPage';
-import FaucetsPage from './pages/categories/FaucetsPage';
-import ShowersPage from './pages/categories/ShowersPage';
-import MirrorsPage from './pages/categories/MirrorsPage';
-import AccessoriesPage from './pages/categories/AccessoriesPage';
-import TowelHoldersPage from './pages/categories/TowelHoldersPage';
 import NotFound from './pages/NotFound';
 import Navbar from './components/common/Navbar';
+import About from './pages/About';
 
 // Admin Imports
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute';
@@ -35,14 +30,10 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
         <Route path="/products" element={<ProductListing />} />
         <Route path="/products/:category" element={<ProductListing />} />
-        <Route path="/collections" element={<CollectionsPage />} />
-        <Route path="/faucets" element={<FaucetsPage />} />
-        <Route path="/showers" element={<ShowersPage />} />
-        <Route path="/mirrors" element={<MirrorsPage />} />
-        <Route path="/accessories" element={<AccessoriesPage />} />
-        <Route path="/towel-holders" element={<TowelHoldersPage />} />
+        <Route path="/products/:category" element={<ProductListing />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -128,7 +119,7 @@ function MainLayout() {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <MainLayout />
     </Router>
   );

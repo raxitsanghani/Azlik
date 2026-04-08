@@ -39,7 +39,7 @@ export const signup = async (req: Request, res: Response) => {
     await newUser.save();
 
     const token = generateToken(newUser._id);
-    res.status(201).json({ token, user: { id: newUser._id, name, email } });
+    res.status(201).json({ token, user: { id: newUser._id, name, email, role: newUser.role } });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -59,7 +59,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken(user._id);
-    res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -68,14 +68,36 @@ export const login = async (req: Request, res: Response) => {
 export const googleAuthCallback = async (req: Request, res: Response) => {
   try {
     const user: any = req.user;
+    console.log('Google Auth Callback reached. User:', user?.email);
+    
     if (!user) {
+      console.error('Google Auth failed: No user found in request');
       return res.redirect('http://localhost:5173/login?error=auth_failed');
     }
 
     const token = generateToken(user._id);
-    // Redirect to frontend with token in the URL (it will be caught and saved in localStorage)
-    res.redirect(`http://localhost:5173/login?token=${token}&user=${encodeURIComponent(JSON.stringify({ id: user._id, name: user.name, email: user.email }))}`);
+    const userData = encodeURIComponent(JSON.stringify({ 
+      id: user._id, 
+      name: user.name, 
+      email: user.email, 
+      role: user.role 
+    }));
+
+    const redirectUrl = `http://localhost:5173/login?token=${token}&user=${userData}`;
+    console.log('Redirecting to:', redirectUrl);
+    
+    // Using a meta refresh or script redirect can sometimes bypass strict 302 origin checks in local dev
+    res.send(`
+      <html>
+        <body>
+          <script>
+            window.location.href = "${redirectUrl}";
+          </script>
+        </body>
+      </html>
+    `);
   } catch (error: any) {
+    console.error('Google Auth Callback Error:', error);
     res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
   }
 };

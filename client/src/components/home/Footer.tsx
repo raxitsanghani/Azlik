@@ -78,11 +78,11 @@ const Footer: React.FC = () => {
             <h4 className="premium-subheading text-white mb-8">Service</h4>
             <ul className="space-y-4 text-white/40 text-sm font-light">
               {[
+                { name: 'About Us', path: '/about' },
                 { name: 'Project Consultation', path: '/enquiries' },
                 { name: 'Dashboard', path: '/dashboard' },
                 { name: 'Saved Products', path: '/saved-products' },
-                { name: 'Login', path: '/login' },
-                { name: 'Signup', path: '/signup' }
+                { name: 'Login', path: '/login' }
               ].map((link) => (
                 <li key={link.name}>
                   <Link to={link.path} className="hover:text-white transition-all duration-300">{link.name}</Link>
@@ -92,11 +92,11 @@ const Footer: React.FC = () => {
           </div>
 
           <div>
-            <h4 className="premium-subheading text-white mb-8">HQ London</h4>
+            <h4 className="premium-subheading text-white mb-8">Corporate HQ</h4>
             <div className="text-white/40 text-sm font-light space-y-4">
-              <p>24 architectural Way, Mayfair<br />London, W1J 7JZ</p>
+              <p>SHREENATH INDUSTRIES<br />Flagship Brand: AZLIK<br />Gujarat, India</p>
               <p>enquiries@azlik.luxury</p>
-              <p>+44 (0) 20 7946 0128</p>
+              <p>Quality Crafted SS 304</p>
             </div>
           </div>
         </div>

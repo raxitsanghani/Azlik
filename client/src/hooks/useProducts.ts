@@ -1,73 +1,43 @@
 import { useState, useEffect } from 'react';
-import { products as initialProducts, Product } from '../data/products';
-import { loadAndSanitizeProducts, saveProductsRawJson } from '../utils/catalogStorage';
+import { Product } from '../data/products';
+import { productService } from '../api/apiService';
 
-const normalizeCategory = (value: string) => value.trim().toLowerCase();
-
-const normalizeProducts = (items: Product[]): Product[] => {
-  return items.map((item) => ({
-    ...item,
-    category: normalizeCategory(String(item.category || 'accessories')),
-    featured: Boolean(item.featured),
-    status: item.status || 'Active',
-  }));
-};
-
-const seedJson = () => JSON.stringify(initialProducts);
-
-export const useProducts = () => {
+export const useProducts = (category?: string) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const fetchProducts = async () => {
+      setLoading(true);
       try {
-        const list = await loadAndSanitizeProducts(seedJson());
-        setProducts(normalizeProducts(list));
-      } catch {
-        const fallback = normalizeProducts(initialProducts);
-        setProducts(fallback);
-        try {
-          await saveProductsRawJson(JSON.stringify(fallback));
-        } catch {
-          /* storage full or private mode */
-        }
+        const response = await productService.getAll({ category: category === 'all' ? undefined : category });
+        // Map backend _id to id for frontend compatibility if needed, 
+        // but current frontend uses .id. Our model has .id as well or we can use ._id
+        const mappedProducts = response.data.map((p: any) => ({
+          ...p,
+          id: p._id || p.id, // Support both MongoDB _id and existing id
+        }));
+        setProducts(mappedProducts);
+        setError(null);
+      } catch (err: any) {
+        console.error('Failed to fetch products:', err);
+        setError('Failed to load products. Please try again later.');
+        // Fallback to empty array or last known good state
+      } finally {
+        setLoading(false);
       }
     };
 
-    void loadProducts();
+    fetchProducts();
+  }, [category]);
 
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key !== 'azlik_products') return;
-      void (async () => {
-        try {
-          if (!e.newValue) {
-            const fb = normalizeProducts(initialProducts);
-            setProducts(fb);
-            await saveProductsRawJson(JSON.stringify(fb));
-            return;
-          }
-          await saveProductsRawJson(e.newValue);
-          const list = await loadAndSanitizeProducts(seedJson());
-          setProducts(normalizeProducts(list));
-        } catch {
-          const fb = normalizeProducts(initialProducts);
-          setProducts(fb);
-        }
-      })();
-    };
-
-    const handleCustomChange = () => void loadProducts();
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('products_updated', handleCustomChange);
-    const poller = window.setInterval(() => void loadProducts(), 1500);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('products_updated', handleCustomChange);
-      window.clearInterval(poller);
-    };
-  }, []);
-
-  return products;
+  return dynamicProductsSync(products, loading, error);
 };
+
+// Helper to maintain existing hook signature or provide extra states
+function dynamicProductsSync(products: Product[], loading: boolean, error: string | null) {
+  // For now, returning products directly to avoid breaking existing components 
+  // that don't expect { products, loading, error }
+  return products;
+}

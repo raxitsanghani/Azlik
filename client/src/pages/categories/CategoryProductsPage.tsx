@@ -27,9 +27,10 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       <div className="premium-card overflow-hidden transition-all duration-500 hover:-translate-y-1">
         <div className="relative aspect-[4/5] bg-premium-ivory overflow-hidden">
           <img
-            src={product.image}
+            src={product.image || (product.images && product.images[0]) || '/placeholder-product.jpg'}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
           />
           <div className="absolute inset-0 bg-premium-charcoal/0 group-hover:bg-premium-charcoal/10 transition-colors duration-500" />
           <div className="absolute top-4 left-4">
@@ -101,6 +102,13 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
     finish: null,
     material: null,
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppliedFilters(prev => ({ ...prev, search: filters.search }));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [filters.search]);
 
   const noProductsToastId = useRef(`cat-no-products-${slug}`);
 
@@ -174,138 +182,80 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
   };
 
   const content = (
-    <div className="w-full pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-      {/* Page Hero Banner */}
-      <section className="max-w-7xl mx-auto mb-14">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="relative overflow-hidden rounded-none"
-        >
-          <div className="absolute inset-0">
-            <img
-              src={config.hero.imageSrc}
-              alt={config.hero.title}
-              className="w-full h-full object-cover"
-            />
+    <div className="w-full pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+
+        <div className="max-w-7xl mx-auto mb-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-premium-charcoal/10 pb-8">
+            <div className="flex items-center gap-4">
+              <h1 className="font-serif text-3xl md:text-4xl">{config.hero.title}</h1>
+              <div className="w-12 h-[1px] bg-premium-charcoal/15 hidden md:block" />
+            </div>
+            {/* Filter controls will follow here if needed, but for now let's keep the existing structure but cleaned up */}
           </div>
+        </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-premium-charcoal/90 via-premium-charcoal/55 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-premium-charcoal/70 via-premium-charcoal/20 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_25%,rgba(201,162,39,0.22)_0%,transparent_55%)]" />
+        <section className="max-w-7xl mx-auto mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.12 }}
+            className="bg-white/60 backdrop-blur-xs border border-premium-charcoal/5 p-6 sm:p-8"
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full lg:w-auto">
+                <div className="relative w-full sm:w-72">
+                  <input
+                    value={filters.search}
+                    onChange={(e) => setFilters((s) => ({ ...s, search: e.target.value }))}
+                    placeholder="Search products..."
+                    className="w-full px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
+                  />
+                </div>
 
-          <div className="relative z-10 px-2 sm:px-0">
-            <div className="max-w-3xl py-14 sm:py-16">
-              <p className="premium-subheading text-premium-ivory/90 mb-5">{config.hero.subheading}</p>
-              <h1 className="premium-heading text-white text-4xl sm:text-5xl lg:text-7xl leading-[1.05]">
-                {config.hero.title}
-              </h1>
-              <p className="text-white/70 mt-5 text-base sm:text-lg leading-relaxed">
-                {config.hero.description}
-              </p>
+                <div className="flex gap-3 items-center">
+                  <select
+                    value={filters.finish ?? ''}
+                    onChange={(e) =>
+                      setFilters((s) => ({ ...s, finish: e.target.value ? e.target.value : null }))
+                    }
+                    className="px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
+                  >
+                    <option value="">Finish</option>
+                    {availableFinishes.map((f) => (
+                      <option key={f} value={f}>
+                        {f}
+                      </option>
+                    ))}
+                  </select>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  onClick={() => window.scrollTo({ top: 720, behavior: 'smooth' })}
-                  className="premium-button !px-10 !py-4 min-w-[220px]"
-                >
-                  View Products
+                  <select
+                    value={filters.material ?? ''}
+                    onChange={(e) =>
+                      setFilters((s) => ({ ...s, material: e.target.value ? e.target.value : null }))
+                    }
+                    className="px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
+                  >
+                    <option value="">Material</option>
+                    {availableMaterials.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button type="button" onClick={applyFilters} className="premium-button !px-8 !py-3 min-w-[170px]">
+                  Apply Filters
                 </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/collections')}
-                  className="premium-btn-outline !px-10 !py-4 min-w-[220px] hover:drop-shadow-[0_0_18px_rgba(201,162,39,0.25)]"
-                >
-                  Explore Collections
+                <button type="button" onClick={clearFilters} className="premium-btn-outline !px-8 !py-3 min-w-[170px]">
+                  Clear
                 </button>
               </div>
             </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Category Title */}
-      <section className="max-w-7xl mx-auto mb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-          className="bg-white/60 backdrop-blur-xs border border-premium-charcoal/5 p-6 sm:p-8"
-        >
-          <h2 className="premium-heading text-3xl sm:text-4xl">{config.hero.subheading}</h2>
-          <p className="text-premium-charcoal/60 mt-3 max-w-2xl font-light leading-relaxed">
-            {config.slug === 'collections'
-              ? 'Premium groupings curated from our latest fittings and accessories.'
-              : 'Curated premium products selected for this category.'}
-          </p>
-        </motion.div>
-      </section>
-
-      {/* Filters */}
-      <section className="max-w-7xl mx-auto mb-10">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.12 }}
-          className="bg-white/60 backdrop-blur-xs border border-premium-charcoal/5 p-6 sm:p-8"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full lg:w-auto">
-              <div className="relative w-full sm:w-72">
-                <input
-                  value={filters.search}
-                  onChange={(e) => setFilters((s) => ({ ...s, search: e.target.value }))}
-                  placeholder="Search products..."
-                  className="w-full px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
-                />
-              </div>
-
-              <div className="flex gap-3 items-center">
-                <select
-                  value={filters.finish ?? ''}
-                  onChange={(e) =>
-                    setFilters((s) => ({ ...s, finish: e.target.value ? e.target.value : null }))
-                  }
-                  className="px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
-                >
-                  <option value="">Finish</option>
-                  {availableFinishes.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.material ?? ''}
-                  onChange={(e) =>
-                    setFilters((s) => ({ ...s, material: e.target.value ? e.target.value : null }))
-                  }
-                  className="px-4 py-3 bg-white/70 border border-premium-charcoal/10 focus:border-premium-royal focus:outline-none text-[13px] transition-all"
-                >
-                  <option value="">Material</option>
-                  {availableMaterials.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button type="button" onClick={applyFilters} className="premium-button !px-8 !py-3 min-w-[170px]">
-                Apply Filters
-              </button>
-              <button type="button" onClick={clearFilters} className="premium-btn-outline !px-8 !py-3 min-w-[170px]">
-                Clear
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </section>
+          </motion.div>
+        </section>
 
       {/* Product Grid */}
       <section className="max-w-7xl mx-auto">

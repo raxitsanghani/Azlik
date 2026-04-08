@@ -14,66 +14,15 @@ import {
   Star,
   Eye
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { productService } from '../../api/apiService';
 import { toast } from 'react-toastify';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { products as initialProductsData, type Product } from '../../data/products';
-import { useNavigate } from 'react-router-dom';
-import {
-  loadAndSanitizeProducts,
-  saveProductsList,
-  sanitizeProductImages,
-} from '../../utils/catalogStorage';
 
-const categories = ['Collections', 'Faucets', 'Showers', 'Mirrors', 'Accessories', 'Towel-Holders'];
+const categories = ['Faucets', 'Showers', 'Mirrors', 'Accessories', 'Towel-Holders'];
 const normalizeCategory = (value: string) => value.trim().toLowerCase();
 
-const fileToDataUrl = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 
-/** Resize/compress to JPEG so large uploads fit IndexedDB and stay durable after refresh. */
-async function fileToCompressedDataUrl(file: File): Promise<string> {
-  if (!file.type.startsWith('image/')) return fileToDataUrl(file);
-  try {
-    const bitmap = await createImageBitmap(file);
-    const maxW = 1600;
-    const scale = Math.min(1, maxW / bitmap.width);
-    const w = Math.round(bitmap.width * scale);
-    const h = Math.round(bitmap.height * scale);
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      bitmap.close();
-      return fileToDataUrl(file);
-    }
-    ctx.drawImage(bitmap, 0, 0, w, h);
-    bitmap.close();
-    return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            resolve(fileToDataUrl(file));
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result));
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        },
-        'image/jpeg',
-        0.82,
-      );
-    });
-  } catch {
-    return fileToDataUrl(file);
-  }
-}
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
@@ -84,39 +33,18 @@ const AdminProducts = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const persistProducts = useCallback(async (updatedProducts: any[]) => {
-    const normalized = updatedProducts.map((product) => ({
-      ...sanitizeProductImages(product),
-      category: normalizeCategory(String(product.category || 'accessories')),
-      featured: Boolean(product.featured),
-    }));
-    setProducts(normalized);
+  const fetchProducts = useCallback(async () => {
     try {
-      await saveProductsList(normalized as Product[]);
-      window.dispatchEvent(new Event('products_updated'));
+      const response = await productService.getAll({ all: true }); // We'll assume admin gets status=any
+      setProducts(response.data.map((p: any) => ({ ...p, id: p._id || p.id })));
     } catch (e) {
       console.error(e);
-      toast.error('Could not save catalog. Try smaller images or free browser storage.');
+      toast.error('Failed to fetch products from server');
     }
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const list = await loadAndSanitizeProducts(JSON.stringify(initialProductsData));
-        if (cancelled) return;
-        const normalized = list.map((product: any) => ({
-          ...product,
-          category: normalizeCategory(String(product.category || 'accessories')),
-          featured: Boolean(product.featured),
-        }));
-        setProducts(normalized);
-      } catch {
-        if (!cancelled) await persistProducts(initialProductsData as any[]);
-      }
-    })();
-
+    fetchProducts();
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setOpenDropdownId(null);
@@ -124,14 +52,14 @@ const AdminProducts = () => {
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      cancelled = true;
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [persistProducts]);
+  }, [fetchProducts]);
   
   // Form State
   const [formData, setFormData] = useState({
     name: '',
+    sku: '',
     category: 'faucets',
     newCategory: '',
     price: '',
@@ -143,43 +71,54 @@ const AdminProducts = () => {
     featured: false
   });
   
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<(File | string)[]>([]);
 
   const handleOpenDropdown = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if(window.confirm('Are you sure you want to delete this product?')) {
-      const newList = products.filter(p => p.id !== id);
-      void persistProducts(newList);
+      try {
+        await productService.delete(id);
+        toast.success('Product deleted successfully');
+        fetchProducts();
+      } catch (err: any) {
+        toast.error('Failed to delete product');
+      }
       setOpenDropdownId(null);
-      toast.success('Product deleted successfully. Auto-synced.');
     }
   };
 
-  const handleDuplicate = (product: any) => {
-    const newProduct = { ...product, id: crypto.randomUUID(), name: `${product.name} (Copy)` };
-    void persistProducts([...products, newProduct]);
+  const handleDuplicate = async (product: any) => {
+    const { id, _id, ...rest } = product;
+    try {
+      await productService.create({ ...rest, name: `${product.name} (Copy)` });
+      toast.success('Product duplicated successfully');
+      fetchProducts();
+    } catch (err: any) {
+      toast.error('Failed to duplicate product');
+    }
     setOpenDropdownId(null);
-    toast.success('Product duplicated successfully.');
   };
 
-  const handleToggleFeatured = (id: string) => {
-    const newList = products.map((p) =>
-      p.id === id ? { ...p, featured: !p.featured } : p
-    );
-    void persistProducts(newList);
-    const target = newList.find((p) => p.id === id);
-    toast.success(target?.featured ? 'Product marked as featured.' : 'Product removed from featured.');
+  const handleToggleFeatured = async (product: any) => {
+    try {
+      await productService.update(product.id || product._id, { featured: !product.featured });
+      toast.success(product.featured ? 'Removed from featured' : 'Marked as featured');
+      fetchProducts();
+    } catch (err: any) {
+      toast.error('Failed to update featured status');
+    }
     setOpenDropdownId(null);
   };
 
   const handleEdit = (product: any) => {
-    setEditingId(product.id);
+    setEditingId(product.id || product._id);
     setFormData({
       name: product.name,
+      sku: product.sku || '',
       category: product.category,
       newCategory: '',
       price: product.price || '',
@@ -187,12 +126,10 @@ const AdminProducts = () => {
       material: product.material || '',
       finish: product.finish || '',
       dimensions: product.dimensions || '',
-      status: product.status || 'Active'
-      ,
+      status: product.status || 'Active',
       featured: Boolean(product.featured)
     });
-    const safe = sanitizeProductImages(product);
-    const loadedImages = safe.images.length ? safe.images : safe.image ? [safe.image] : [];
+    const loadedImages = product.images?.length ? product.images : product.image ? [product.image] : [];
     setImages(loadedImages);
     setOpenDropdownId(null);
     setIsModalOpen(true);
@@ -202,6 +139,7 @@ const AdminProducts = () => {
     setEditingId(null);
     setFormData({
       name: '',
+      sku: `SKU-${Date.now().toString().slice(-6)}`,
       category: 'faucets',
       newCategory: '',
       price: '',
@@ -209,15 +147,14 @@ const AdminProducts = () => {
       material: '',
       finish: '',
       dimensions: '',
-      status: 'Active'
-      ,
+      status: 'Active',
       featured: false
     });
     setImages([]);
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     let finalCategory = formData.category;
@@ -226,52 +163,44 @@ const AdminProducts = () => {
     }
     finalCategory = normalizeCategory(finalCategory);
 
-    const mainImage = images.length > 0 ? images[0] : initialProductsData[0].image;
+    const formDataPayload = new FormData();
+    formDataPayload.append('name', formData.name);
+    formDataPayload.append('sku', formData.sku);
+    formDataPayload.append('category', finalCategory);
+    formDataPayload.append('price', formData.price);
+    formDataPayload.append('description', formData.description);
+    formDataPayload.append('material', formData.material);
+    formDataPayload.append('finish', formData.finish);
+    formDataPayload.append('dimensions', formData.dimensions);
+    formDataPayload.append('status', formData.status);
+    formDataPayload.append('featured', String(formData.featured));
 
-    if (editingId) {
-      const newList = products.map(p => p.id === editingId ? { 
-        ...p, 
-        name: formData.name, 
-        category: finalCategory, 
-        price: formData.price,
-        description: formData.description,
-        material: formData.material,
-        finish: formData.finish,
-        dimensions: formData.dimensions,
-        status: formData.status,
-        featured: formData.featured,
-        image: mainImage,
-        images: images
-      } : p);
-      void persistProducts(newList);
-      toast.success('Product updated successfully. User panel synced in real-time.', { toastId: 'prod-update' });
-    } else {
-      const newProduct = {
-        id: crypto.randomUUID(),
-        name: formData.name,
-        category: finalCategory,
-        price: formData.price,
-        description: formData.description,
-        material: formData.material,
-        finish: formData.finish,
-        dimensions: formData.dimensions,
-        status: formData.status,
-        featured: formData.featured,
-        stock: 10,
-        image: mainImage,
-        images: images
-      };
-      void persistProducts([...products, newProduct]);
-      toast.success('Product added successfully. Auto-synced to User Panel!', { toastId: 'prod-add' });
+    images.forEach(img => {
+      if (typeof img === 'string') {
+        formDataPayload.append('existingImages', img);
+      } else {
+        formDataPayload.append('images', img);
+      }
+    });
+
+    try {
+      if (editingId) {
+        await productService.update(editingId, formDataPayload);
+        toast.success('Product updated successfully');
+      } else {
+        await productService.create(formDataPayload);
+        toast.success('Product added successfully');
+      }
+      fetchProducts();
+      setIsModalOpen(false);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to save product');
     }
-    setIsModalOpen(false);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const newImages = await Promise.all(
-        Array.from(e.target.files).map((f) => fileToCompressedDataUrl(f)),
-      );
+      const newImages = Array.from(e.target.files);
       setImages((prev) => [...prev, ...newImages]);
     }
     e.target.value = '';
@@ -332,7 +261,7 @@ const AdminProducts = () => {
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
-                          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                          <img src={product.image || (product.images && product.images[0]) || '/placeholder-product.jpg'} alt={product.name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }} />
                         </div>
                         <span className="font-bold text-premium-charcoal">{product.name}</span>
                       </div>
@@ -437,8 +366,8 @@ const AdminProducts = () => {
 
               <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                 <form id="productForm" onSubmit={handleSubmit} className="space-y-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="sm:col-span-2 space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Product Name</label>
                       <input 
                         type="text" 
@@ -450,6 +379,20 @@ const AdminProducts = () => {
                       />
                     </div>
                     <div className="space-y-2">
+                      <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">SKU</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={formData.sku}
+                        onChange={(e) => setFormData({...formData, sku: e.target.value})}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-premium-charcoal/20 transition-all font-medium"
+                        placeholder="e.g. F-101"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Price (Optional)</label>
                       <input 
                         type="text" 
@@ -459,9 +402,6 @@ const AdminProducts = () => {
                         placeholder="e.g. $299"
                       />
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Category</label>
                       <select 
@@ -582,7 +522,7 @@ const AdminProducts = () => {
                              key={index} 
                              className="relative w-32 h-32 rounded-2xl overflow-hidden shrink-0 border border-gray-200 group flex items-center justify-center bg-gray-50"
                            >
-                             <img src={img} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                             <img src={typeof img === 'string' ? img : URL.createObjectURL(img as File)} alt={`Preview ${index}`} className="w-full h-full object-cover" />
                              {index === 0 && (
                                <div className="absolute top-2 left-2 bg-premium-charcoal text-white text-[10px] uppercase font-bold px-2 py-1 rounded">Cover</div>
                              )}
