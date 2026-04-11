@@ -38,8 +38,8 @@ router.get('/:id', getProductById);
 router.get('/sku/:sku', getProductBySku);
 
 // Admin Routes
-router.post('/', protect, adminProtect, upload.array('images', 10), createProduct);
-router.put('/:id', protect, adminProtect, upload.array('images', 10), updateProduct);
+router.post('/', protect, adminProtect, upload.any(), createProduct);
+router.put('/:id', protect, adminProtect, upload.any(), updateProduct);
 router.delete('/:id', protect, adminProtect, deleteProduct);
 
 export default router;

@@ -53,6 +53,7 @@ export const createProduct = async (req: any, res: Response) => {
   try {
     let images: string[] = [];
     
+    // 1. Process Main Images (Files + Existing)
     if (req.body.existingImages) {
         if (Array.isArray(req.body.existingImages)) {
             images.push(...req.body.existingImages);
@@ -61,24 +62,77 @@ export const createProduct = async (req: any, res: Response) => {
         }
     }
     
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const baseUrl = `${protocol}://${host}`;
+
     if (req.files && Array.isArray(req.files)) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      const baseUrl = `${protocol}://${host}`;
-      const newImages = req.files.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+      const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
+      const newImages = mainImages.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
       images.push(...newImages);
     }
 
-    const productData = { ...req.body };
+    // 2. Prepare Product Data (Exclude variants for now)
+    const { variants: rawVariants, existingImages, ...basicBody } = req.body;
+    const productData: any = { ...basicBody };
+
+    // Sanitize numeric fields
+    if (productData.price === '' || productData.price === undefined || productData.price === 'null') {
+      delete productData.price;
+    } else {
+      productData.price = Number(productData.price);
+    }
+
+    if (productData.featured === 'true') productData.featured = true;
+    if (productData.featured === 'false') productData.featured = false;
+
+    // 3. Handle Variants and Variant Images
+    let finalVariants: any[] = [];
+    if (rawVariants) {
+      try {
+        const parsedVariants = typeof rawVariants === 'string' ? JSON.parse(rawVariants) : rawVariants;
+        finalVariants = parsedVariants.map((v: any, index: number) => {
+          let variantImages: string[] = [];
+          if (v.existingImages && Array.isArray(v.existingImages)) {
+            variantImages.push(...v.existingImages);
+          } else if (v.existingImages) {
+            variantImages.push(v.existingImages);
+          }
+
+          if (req.files && Array.isArray(req.files)) {
+            const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
+            const vNewImages = vFiles.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+            variantImages.push(...vNewImages);
+          }
+          
+          return {
+            ...v,
+            images: variantImages,
+            stock: v.stock === '' || v.stock === undefined ? 0 : Number(v.stock),
+            price: v.price === '' || v.price === undefined ? undefined : Number(v.price)
+          };
+        });
+        productData.variants = finalVariants;
+      } catch (err) {
+         console.error('Failed to parse variants:', err);
+      }
+    }
+
+    // 4. Final Image Assignment (Fallback to variant image if main is missing)
     if (images.length > 0) {
       productData.image = images[0];
       productData.images = images;
+    } else if (finalVariants.length > 0 && finalVariants[0].images?.length > 0) {
+      // If no main image but variants have images, pick the first variant's first image
+      productData.image = finalVariants[0].images[0];
+      productData.images = [finalVariants[0].images[0]];
     }
 
     const product = new Product(productData);
     await product.save();
     res.status(201).json(product);
   } catch (error: any) {
+    console.error('Create Product Error:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -87,6 +141,7 @@ export const updateProduct = async (req: any, res: Response) => {
   try {
     let images: string[] = [];
     
+    // 1. Process Main Images (Files + Existing)
     if (req.body.existingImages) {
         if (Array.isArray(req.body.existingImages)) {
             images.push(...req.body.existingImages);
@@ -95,18 +150,69 @@ export const updateProduct = async (req: any, res: Response) => {
         }
     }
     
+    const host = req.get('host');
+    const protocol = req.protocol;
+    const baseUrl = `${protocol}://${host}`;
+
     if (req.files && Array.isArray(req.files)) {
-      const host = req.get('host');
-      const protocol = req.protocol;
-      const baseUrl = `${protocol}://${host}`;
-      const newImages = req.files.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+      const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
+      const newImages = mainImages.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
       images.push(...newImages);
     }
 
-    const productData = { ...req.body };
+    // 2. Prepare Product Data (Exclude variants for now)
+    const { variants: rawVariants, existingImages, ...basicBody } = req.body;
+    const productData: any = { ...basicBody };
+
+    // Sanitize numeric fields
+    if (productData.price === '' || productData.price === undefined || productData.price === 'null') {
+      delete productData.price;
+    } else {
+      productData.price = Number(productData.price);
+    }
+
+    if (productData.featured === 'true') productData.featured = true;
+    if (productData.featured === 'false') productData.featured = false;
+
+    // 3. Handle Variants and Variant Images
+    let finalVariants: any[] = [];
+    if (rawVariants) {
+      try {
+        const parsedVariants = typeof rawVariants === 'string' ? JSON.parse(rawVariants) : rawVariants;
+        finalVariants = parsedVariants.map((v: any, index: number) => {
+          let variantImages: string[] = [];
+          if (v.existingImages && Array.isArray(v.existingImages)) {
+            variantImages.push(...v.existingImages);
+          } else if (v.existingImages) {
+            variantImages.push(v.existingImages);
+          }
+
+          if (req.files && Array.isArray(req.files)) {
+            const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
+            const vNewImages = vFiles.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+            variantImages.push(...vNewImages);
+          }
+          
+          return {
+            ...v,
+            images: variantImages,
+            stock: v.stock === '' || v.stock === undefined ? 0 : Number(v.stock),
+            price: v.price === '' || v.price === undefined ? undefined : Number(v.price)
+          };
+        });
+        productData.variants = finalVariants;
+      } catch (err) {
+         console.error('Failed to parse variants:', err);
+      }
+    }
+
+    // 4. Final Image Assignment (Fallback to variant image if main is missing)
     if (images.length > 0) {
       productData.image = images[0];
       productData.images = images;
+    } else if (finalVariants.length > 0 && finalVariants[0].images?.length > 0) {
+      productData.image = finalVariants[0].images[0];
+      productData.images = [finalVariants[0].images[0]];
     }
 
     const product = await Product.findByIdAndUpdate(req.params.id, productData, { new: true });
@@ -115,6 +221,7 @@ export const updateProduct = async (req: any, res: Response) => {
     }
     res.status(200).json(product);
   } catch (error: any) {
+    console.error('Update Product Error:', error);
     res.status(400).json({ message: error.message });
   }
 };

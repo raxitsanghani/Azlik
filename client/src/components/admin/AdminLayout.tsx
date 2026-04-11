@@ -8,7 +8,8 @@ import {
   X,
   Users,
   MessageSquare,
-  Bell
+  Bell,
+  Layers
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -35,6 +36,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const navItems = [
     { label: 'Dashboard', path: '/admin-dashboard', icon: LayoutDashboard },
     { label: 'Products', path: '/admin-dashboard/products', icon: Package },
+    { label: 'Collections', path: '/admin-dashboard/collections', icon: Layers },
     { label: 'Enquiries', path: '/admin-dashboard/enquiries', icon: MessageSquare },
     { label: 'Users', path: '/admin-dashboard/users', icon: Users },
   ];

@@ -48,9 +48,9 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
             {product.description}
           </p>
 
-          <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-widest text-premium-charcoal/40 font-bold">
+          <div className="flex flex-wrap gap-4 text-[10px] uppercase tracking-widest text-premium-charcoal/70 font-bold">
             <span>{product.finish}</span>
-            <span className="opacity-30">•</span>
+            <span className="opacity-70">•</span>
             <span>{product.material}</span>
           </div>
 
@@ -268,7 +268,7 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
         ) : loadError ? (
           <div className="py-20 text-center">
             <h3 className="font-serif text-2xl mb-2">Failed to load products</h3>
-            <p className="text-premium-charcoal/40 font-light">Please try again shortly.</p>
+            <p className="text-premium-charcoal/70 font-light">Please try again shortly.</p>
             <button type="button" onClick={() => navigate('/')} className="premium-btn-outline mt-6">
               Return Home
             </button>
@@ -285,7 +285,7 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
                     <div key={group.title}>
                       <div className="flex items-end justify-between gap-6 mb-6">
                         <div>
-                          <p className="premium-subheading !text-premium-charcoal/50 mb-2">{group.title}</p>
+                          <p className="premium-subheading !text-premium-charcoal/80 mb-2">{group.title}</p>
                           {group.description ? (
                             <p className="text-premium-charcoal/60 font-light leading-relaxed">
                               {group.description}
@@ -305,7 +305,7 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
                           </AnimatePresence>
                         </div>
                       ) : (
-                        <div className="py-10 text-premium-charcoal/40 text-center font-light">
+                        <div className="py-10 text-premium-charcoal/70 text-center font-light">
                           No products found in this set.
                         </div>
                       )}
@@ -341,4 +341,5 @@ const CategoryProductsPage: React.FC<{ slug: CategorySlug }> = ({ slug }) => {
 };
 
 export default CategoryProductsPage;
+
 

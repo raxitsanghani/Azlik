@@ -55,4 +55,18 @@ export const adminService = {
   getStats: () => api.get('/admin/stats'),
 };
 
+export const collectionService = {
+  getAll: (params?: any) => api.get('/collections', { params }),
+  getById: (id: string) => api.get(`/collections/${id}`),
+  create: (data: any) => api.post('/collections', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  update: (id: string, data: any) => api.put(`/collections/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  delete: (id: string) => api.delete(`/collections/${id}`),
+};
+
+export const categoryService = {
+  getAll: () => api.get('/categories'),
+  create: (name: string) => api.post('/categories', { name }),
+  delete: (id: string) => api.delete(`/categories/${id}`),
+};
+
 export default api;

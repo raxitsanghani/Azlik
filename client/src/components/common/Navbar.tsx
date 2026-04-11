@@ -3,10 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, User } from 'lucide-react';
 import Logo from './Logo';
+import { categoryService } from '../../api/apiService';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   const location = useLocation();
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -18,18 +20,33 @@ const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu and scroll to top on route change
   useEffect(() => {
     setIsOpen(false);
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await categoryService.getAll();
+        setDynamicCategories(res.data);
+      } catch (e) {
+        console.error('Failed to fetch dynamic categories');
+      }
+    };
+    fetchCats();
+  }, []);
+
   const navLinks = [
-    { name: 'Collections', path: '/products' },
+    { name: 'Collections', path: '/collections' },
     { name: 'About', path: '/about' },
-    { name: 'Faucets', path: '/products/faucets' },
-    { name: 'Showers', path: '/products/showers' },
-    { name: 'Mirrors', path: '/products/mirrors' },
-    { name: 'Accessories', path: '/products/accessories' },
+    { 
+      name: 'Accessories', 
+      path: dynamicCategories.length > 0 
+        ? `/accessories/${dynamicCategories[0].slug}` 
+        : '/accessories' 
+    },
   ];
 
   const isHome = location.pathname === '/';
@@ -159,6 +176,37 @@ const Navbar: React.FC = () => {
               </Link>
             )}
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Accessories Submenu */}
+      <AnimatePresence>
+        {location.pathname.startsWith('/accessories') && dynamicCategories.length > 0 && (
+           <motion.div
+             initial={{ height: 0, opacity: 0 }}
+             animate={{ height: 'auto', opacity: 1 }}
+             exit={{ height: 0, opacity: 0 }}
+             className="absolute top-full left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm overflow-hidden"
+           >
+             <div className="max-w-7xl mx-auto px-6 overflow-x-auto no-scrollbar pointer-events-auto">
+               <div className="flex items-center gap-6 py-4 min-w-max">
+                 {dynamicCategories.map(cat => {
+                   const isActive = location.pathname.includes(cat.slug) || (location.pathname === '/accessories' && cat.slug === dynamicCategories[0].slug); 
+                   return (
+                     <Link
+                       key={cat._id}
+                       to={`/accessories/${cat.slug}`}
+                       className={`text-xs uppercase tracking-widest font-bold whitespace-nowrap transition-colors border-b-2 pb-1
+                         ${isActive ? 'text-premium-royal border-premium-royal' : 'text-gray-500 border-transparent hover:text-black hover:border-gray-200'}
+                       `}
+                     >
+                       {cat.name}
+                     </Link>
+                   )
+                 })}
+               </div>
+             </div>
+           </motion.div>
         )}
       </AnimatePresence>
     </nav>

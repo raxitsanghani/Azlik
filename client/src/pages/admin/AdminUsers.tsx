@@ -95,7 +95,7 @@ const AdminUsers = () => {
 
       <div className="bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input 
             type="text" 
             placeholder="Search users by name or email..." 
@@ -140,8 +140,8 @@ const AdminUsers = () => {
                     <tr key={user._id} className="hover:bg-gray-50/50 transition-colors group">
                       <td className="p-4 pl-6">
                         <div className="font-bold text-premium-charcoal">{user.name}</div>
-                        <div className="text-sm text-gray-400">{user.email}</div>
-                        {user.phone && <div className="text-xs text-gray-400 mt-1">{user.phone}</div>}
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                        {user.phone && <div className="text-xs text-gray-500 mt-1">{user.phone}</div>}
                       </td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-bold ${
@@ -152,12 +152,12 @@ const AdminUsers = () => {
                       </td>
                       <td className="p-4">
                         <div className="text-sm text-gray-600 font-medium">{joinedDate}</div>
-                        <div className="text-xs text-gray-400 mt-1">L. {lastLoginDate}</div>
+                        <div className="text-xs text-gray-500 mt-1">L. {lastLoginDate}</div>
                       </td>
                       <td className="p-4">
                          <div className="text-sm font-bold text-gray-600 space-x-3">
-                           <span><span className="text-gray-400 font-medium">E:</span> {user.enquiriesCount || 0}</span>
-                           <span><span className="text-gray-400 font-medium">S:</span> {user.savedProductsCount || 0}</span>
+                           <span><span className="text-gray-500 font-medium">E:</span> {user.enquiriesCount || 0}</span>
+                           <span><span className="text-gray-500 font-medium">S:</span> {user.savedProductsCount || 0}</span>
                          </div>
                       </td>
                       <td className="p-4">
@@ -169,11 +169,11 @@ const AdminUsers = () => {
                       </td>
                       <td className="p-4 pr-6 text-right relative">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
+                          <button className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
                             <Eye size={18} />
                           </button>
                           {!isAdmin && (
-                            <button onClick={() => handleDelete(user._id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                            <button onClick={() => handleDelete(user._id)} className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                               <Trash2 size={18} />
                             </button>
                           )}

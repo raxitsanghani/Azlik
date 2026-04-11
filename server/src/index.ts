@@ -7,6 +7,8 @@ import userRoutes from './routes/userRoutes';
 import productRoutes from './routes/productRoutes';
 import enquiryRoutes from './routes/enquiryRoutes';
 import adminRoutes from './routes/adminRoutes';
+import collectionRoutes from './routes/collectionRoutes';
+import categoryRoutes from './routes/categoryRoutes';
 
 import session from 'express-session';
 import passport from './config/passport';
@@ -46,6 +48,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/enquiry', enquiryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Database Connection
 const PORT = process.env.PORT || 5000;

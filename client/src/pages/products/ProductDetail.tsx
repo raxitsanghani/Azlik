@@ -15,6 +15,7 @@ const ProductDetail = () => {
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [resolved, setResolved] = useState(false);
   const [activeImage, setActiveImage] = useState<string>('');
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -22,11 +23,20 @@ const ProductDetail = () => {
       try {
         const response = await productService.getById(id);
         const data = response.data;
-        setProduct({
+        const normalizedProduct = {
           ...data,
           id: data._id || data.id
-        });
-        setActiveImage(data.image || (data.images && data.images[0]) || '/placeholder-product.jpg');
+        };
+        setProduct(normalizedProduct);
+        
+        // Initial Image setup: First variant image or main product image
+        if (normalizedProduct.variants && normalizedProduct.variants.length > 0) {
+            const firstVariant = normalizedProduct.variants[0];
+            setSelectedVariantIndex(0);
+            setActiveImage(firstVariant.images?.[0] || normalizedProduct.image || '/placeholder-product.jpg');
+        } else {
+            setActiveImage(normalizedProduct.image || (normalizedProduct.images && normalizedProduct.images[0]) || '/placeholder-product.jpg');
+        }
       } catch (err: any) {
         console.error('Failed to fetch product:', err);
         navigate('/products');
@@ -37,6 +47,15 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id, navigate]);
+
+  const handleVariantSelect = (index: number) => {
+    if (!product || !product.variants) return;
+    setSelectedVariantIndex(index);
+    const variant = product.variants[index];
+    if (variant.images && variant.images.length > 0) {
+      setActiveImage(variant.images[0]);
+    }
+  };
 
   if (!resolved) {
     return (
@@ -60,6 +79,9 @@ const ProductDetail = () => {
   }
 
   if (!product) return null;
+
+  const currentVariant = product.variants?.[selectedVariantIndex];
+  const galleryImages = currentVariant?.images?.length ? currentVariant.images : (product.images || []);
 
   const handleDownloadPdf = async () => {
     try {
@@ -88,18 +110,21 @@ const ProductDetail = () => {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
-            <div className="premium-card aspect-[4/5] overflow-hidden bg-gray-50">
-              <img 
-                src={activeImage || product.image || '/placeholder-product.jpg'} 
+            <div className="premium-card aspect-[4/5] overflow-hidden bg-gray-50 flex items-center justify-center">
+              <motion.img 
+                key={activeImage}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                src={activeImage || '/placeholder-product.jpg'} 
                 alt={product.name} 
                 className="w-full h-full object-cover transition-transform duration-[1.5s] hover:scale-105"
                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
               />
             </div>
             
-            {(product.images && product.images.length > 0) && (
+            {galleryImages.length > 0 && (
               <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                {product.images.map((imgUrl, idx) => (
+                {galleryImages.map((imgUrl, idx) => (
                   <button 
                     key={idx}
                     onClick={() => setActiveImage(imgUrl)}
@@ -131,7 +156,7 @@ const ProductDetail = () => {
             
             <div className="flex flex-wrap gap-8 mb-10 pb-10 border-b border-premium-charcoal/5">
               <div>
-                <p className="premium-subheading mb-1 opacity-40">Finish</p>
+                <p className="premium-subheading mb-1 opacity-40">Default Finish</p>
                 <p className="text-[13px] font-medium tracking-wide">{product.finish}</p>
               </div>
               <div>
@@ -143,6 +168,29 @@ const ProductDetail = () => {
                 <p className="text-[13px] font-medium tracking-wide">{product.dimensions}</p>
               </div>
             </div>
+
+            {/* COLOR VARIANT SELECTION */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-12">
+                <p className="premium-subheading mb-4 text-premium-charcoal/60">Available Finishes</p>
+                <div className="flex flex-wrap gap-3">
+                    {product.variants.map((variant, idx) => (
+                        <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleVariantSelect(idx)}
+                            className={`px-5 py-2.5 rounded-full text-[10px] uppercase tracking-widest font-black transition-all border-2 ${
+                                selectedVariantIndex === idx 
+                                ? 'bg-premium-charcoal text-white border-premium-charcoal shadow-lg scale-105' 
+                                : 'bg-transparent text-premium-charcoal/60 border-premium-charcoal/10 hover:border-premium-charcoal/30 hover:text-premium-charcoal'
+                            }`}
+                        >
+                            {variant.colorName}
+                        </button>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-8 mb-12">
               <p className="text-premium-charcoal/70 font-light leading-relaxed text-lg">
@@ -205,7 +253,11 @@ const ProductDetail = () => {
       </div>
 
       <ProductEnquiryModal
-        product={product}
+        product={{
+            ...product,
+            // Pass the currently selected finish/color to the enquiry modal
+            finish: currentVariant?.colorName || product.finish
+        }}
         isOpen={enquiryOpen}
         onClose={() => setEnquiryOpen(false)}
       />

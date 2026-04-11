@@ -188,6 +188,29 @@ const AboutPage: React.FC = () => {
           </div>
         </section>
 
+        {/* Contact Details */}
+        <section className="py-24 bg-white">
+          <div className="container mx-auto px-6 text-center max-w-4xl">
+            <h2 className="premium-heading text-4xl mb-12">Contact Us</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-8 border border-gray-100 shadow-sm rounded-xl hover:shadow-lg transition-shadow">
+                <h4 className="font-bold text-premium-charcoal text-lg mb-4">Corporate Office</h4>
+                <p className="text-gray-500 text-sm">Shreenath Industries,<br/>GIDC Phase 2,<br/>Rajkot, Gujarat - 360004</p>
+              </div>
+              <div className="p-8 border border-gray-100 shadow-sm rounded-xl hover:shadow-lg transition-shadow">
+                <h4 className="font-bold text-premium-charcoal text-lg mb-4">Direct Inquiry</h4>
+                <p className="text-gray-500 text-sm mb-2">Phone: +91 99999 88888</p>
+                <p className="text-gray-500 text-sm">Sales: +91 88888 77777</p>
+              </div>
+              <div className="p-8 border border-gray-100 shadow-sm rounded-xl hover:shadow-lg transition-shadow">
+                <h4 className="font-bold text-premium-charcoal text-lg mb-4">Digital Support</h4>
+                <p className="text-gray-500 text-sm mb-2">info@shreenath-industries.com</p>
+                <p className="text-gray-500 text-sm">support@azlik.com</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <Footer />
       </div>
     </PageLayout>

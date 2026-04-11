@@ -12,6 +12,8 @@ import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductListing from './pages/products/ProductListing';
 import ProductDetail from './pages/products/ProductDetail';
+import CollectionsPage from './pages/collections/CollectionsPage';
+import CollectionDetail from './pages/collections/CollectionDetail';
 import NotFound from './pages/NotFound';
 import Navbar from './components/common/Navbar';
 import About from './pages/About';
@@ -20,8 +22,9 @@ import About from './pages/About';
 import AdminProtectedRoute from './components/admin/AdminProtectedRoute';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
-import AdminEnquiries from './pages/admin/AdminEnquiries';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminCollections from './pages/admin/AdminCollections';
+import AdminEnquiries from './pages/admin/AdminEnquiries';
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -31,9 +34,12 @@ function AnimatedRoutes() {
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/collections" element={<CollectionsPage />} />
+        <Route path="/collections/:id" element={<CollectionDetail />} />
         <Route path="/products" element={<ProductListing />} />
         <Route path="/products/:category" element={<ProductListing />} />
-        <Route path="/products/:category" element={<ProductListing />} />
+        <Route path="/accessories" element={<ProductListing />} />
+        <Route path="/accessories/:category" element={<ProductListing />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
@@ -49,6 +55,14 @@ function AnimatedRoutes() {
                <AdminDashboard />
             </AdminProtectedRoute>
           } 
+        />
+        <Route 
+           path="/admin-dashboard/collections" 
+           element={
+             <AdminProtectedRoute>
+                <AdminCollections />
+             </AdminProtectedRoute>
+           } 
         />
         <Route 
           path="/admin-dashboard/products" 

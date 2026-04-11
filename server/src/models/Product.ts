@@ -1,5 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IProductVariant {
+  colorName: string;
+  images: string[];
+  stock: number;
+  price?: number;
+  sku?: string;
+}
+
 export interface IProduct extends Document {
   id: string; // SKU or slug
   name: string;
@@ -13,8 +21,18 @@ export interface IProduct extends Document {
   featured: boolean;
   status: 'Active' | 'Inactive';
   sku?: string;
+  accessoryCategory?: string;
+  variants?: IProductVariant[];
   createdAt: Date;
 }
+
+const ProductVariantSchema = new Schema({
+  colorName: { type: String, required: true },
+  images: [{ type: String }],
+  stock: { type: Number, default: 0 },
+  price: { type: Number },
+  sku: { type: String }
+});
 
 const ProductSchema: Schema = new Schema({
   name: { type: String, required: true },
@@ -30,7 +48,9 @@ const ProductSchema: Schema = new Schema({
   dimensions: { type: String, required: true },
   featured: { type: Boolean, default: false },
   status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
-  sku: { type: String, unique: true },
+  sku: { type: String, unique: true, sparse: true },
+  accessoryCategory: { type: String },
+  variants: [ProductVariantSchema],
   createdAt: { type: Date, default: Date.now }
 });
 

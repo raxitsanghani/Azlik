@@ -36,7 +36,7 @@ export const useProducts = (category?: string) => {
 };
 
 // Helper to maintain existing hook signature or provide extra states
-function dynamicProductsSync(products: Product[], loading: boolean, error: string | null) {
+function dynamicProductsSync(products: Product[], _loading: boolean, _error: string | null) {
   // For now, returning products directly to avoid breaking existing components 
   // that don't expect { products, loading, error }
   return products;
