@@ -15,16 +15,19 @@ import passport from './config/passport';
 
 import path from 'path';
 
-dotenv.config({ path: path.join(__dirname, '../../.env') });
-console.log('Environment loaded from root .env');
-console.log('PORT:', process.env.PORT);
+// Load environment variables safely
+dotenv.config(); // Simple load for standard environments
+try {
+  dotenv.config({ path: path.join(__dirname, '../../.env') });
+} catch (e) {
+  // Ignore error if root .env is missing (e.g. on Vercel)
+}
 
 const app = express();
-console.log('Attempting to start server...');
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: true, // Allow all origins during initial deployment help
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -65,3 +68,5 @@ mongoose.connect(MONGO_URI)
   .catch((err) => {
     console.error('Database connection error:', err);
   });
+
+export default app;
