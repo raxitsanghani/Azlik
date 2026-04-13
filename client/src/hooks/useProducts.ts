@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Product } from '../data/products';
-import { productService } from '../api/apiService';
+import { productService, getFullImageUrl } from '../api/apiService';
 
 export const useProducts = (category?: string) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,10 +14,18 @@ export const useProducts = (category?: string) => {
         const response = await productService.getAll({ category: category === 'all' ? undefined : category });
         // Map backend _id to id for frontend compatibility if needed, 
         // but current frontend uses .id. Our model has .id as well or we can use ._id
-        const mappedProducts = response.data.map((p: any) => ({
-          ...p,
-          id: p._id || p.id, // Support both MongoDB _id and existing id
-        }));
+        const mappedProducts = Array.isArray(response.data) 
+          ? response.data.map((p: any) => ({
+              ...p,
+              id: p._id || p.id,
+              image: getFullImageUrl(p.image),
+              images: (p.images || []).map((img: string) => getFullImageUrl(img)),
+              variants: (p.variants || []).map((v: any) => ({
+                ...v,
+                images: (v.images || []).map((img: string) => getFullImageUrl(img))
+              }))
+            }))
+          : [];
         setProducts(mappedProducts);
         setError(null);
       } catch (err: any) {

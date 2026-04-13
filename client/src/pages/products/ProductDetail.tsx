@@ -6,7 +6,7 @@ import { Product } from '../../data/products';
 import ProductEnquiryModal from '../../components/enquiry/ProductEnquiryModal';
 import { generateProductPdf } from '../../utils/pdfUtils';
 import { toast } from 'react-toastify';
-import { productService } from '../../api/apiService';
+import { productService, getFullImageUrl } from '../../api/apiService';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +25,13 @@ const ProductDetail = () => {
         const data = response.data;
         const normalizedProduct = {
           ...data,
-          id: data._id || data.id
+          id: data._id || data.id,
+          image: getFullImageUrl(data.image),
+          images: (data.images || []).map((img: string) => getFullImageUrl(img)),
+          variants: (data.variants || []).map((v: any) => ({
+            ...v,
+            images: (v.images || []).map((img: string) => getFullImageUrl(img))
+          }))
         };
         setProduct(normalizedProduct);
         

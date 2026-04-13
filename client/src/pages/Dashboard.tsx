@@ -5,7 +5,7 @@ import {
   ShoppingBag,
   ArrowLeft
 } from 'lucide-react';
-import { userService } from '../api/apiService';
+import { userService, getFullImageUrl } from '../api/apiService';
 import { DashboardSkeleton } from '../components/dashboard/Skeleton';
 import ProfileCard from '../components/dashboard/ProfileCard';
 import SecurityCard from '../components/dashboard/SecurityCard';
@@ -78,7 +78,7 @@ const Dashboard = () => {
           >
             <div className="w-full h-full rounded-full bg-premium-platinum overflow-hidden flex items-center justify-center relative bg-gradient-to-br from-premium-platinum to-premium-beige/20">
                {userData.avatar ? (
-                 <img src={userData.avatar} alt={userData.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                 <img src={getFullImageUrl(userData.avatar)} alt={userData.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                ) : (
                  <span className="text-4xl font-serif text-premium-charcoal/40 uppercase">
                    {getInitial(userData.name)}

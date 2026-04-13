@@ -9,7 +9,8 @@ import {
   Users,
   MessageSquare,
   Bell,
-  Layers
+  Layers,
+  Tag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -37,6 +38,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { label: 'Dashboard', path: '/admin-dashboard', icon: LayoutDashboard },
     { label: 'Products', path: '/admin-dashboard/products', icon: Package },
     { label: 'Collections', path: '/admin-dashboard/collections', icon: Layers },
+    { label: 'Categories', path: '/admin-dashboard/categories', icon: Tag },
     { label: 'Enquiries', path: '/admin-dashboard/enquiries', icon: MessageSquare },
     { label: 'Users', path: '/admin-dashboard/users', icon: Users },
   ];

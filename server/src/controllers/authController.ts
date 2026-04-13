@@ -48,7 +48,20 @@ export const signup = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+
+    // Force create/update admin if it's the requested credentials and doesn't exist
+    if (!user && email === 'azlikadmin@gmail.com') {
+       console.log('Admin user missing, creating now...');
+       const hashedPassword = await bcrypt.hash('azlikadmin21', 12);
+       user = await User.create({
+         name: 'Azlik Admin',
+         email: 'azlikadmin@gmail.com',
+         password: hashedPassword,
+         role: 'admin',
+         isVerified: true
+       });
+    }
 
     if (!user) {
       return res.status(401).json({ message: 'Account not found. Please sign up again.' });

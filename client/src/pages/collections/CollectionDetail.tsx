@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collectionService } from '../../api/apiService';
+import { collectionService, getFullImageUrl } from '../../api/apiService';
 import PageLayout from '../../components/common/PageLayout';
 import { ArrowLeft, ChevronRight, Maximize2, Sparkles, ShieldCheck, Ruler, Palette } from 'lucide-react';
 import ImagePreviewModal from '../../components/common/ImagePreviewModal';
@@ -18,8 +18,14 @@ const CollectionDetail = () => {
             if (!id) return;
             try {
                 const res = await collectionService.getById(id);
-                setCollection(res.data);
-                setSelectedImage(res.data.image || res.data.images?.[0] || '');
+                const data = res.data;
+                const mappedData = {
+                    ...data,
+                    image: getFullImageUrl(data.image),
+                    images: (data.images || []).map((img: string) => getFullImageUrl(img))
+                };
+                setCollection(mappedData);
+                setSelectedImage(mappedData.image || mappedData.images?.[0] || '');
             } catch (err) {
                 console.error("Failed to load collection details", err);
             } finally {

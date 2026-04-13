@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { User, ArrowRight, Check, X, Camera } from 'lucide-react';
-import { userService } from '../../api/apiService';
+import { userService, getFullImageUrl } from '../../api/apiService';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
 import { compressImage } from '../../utils/imageUtils';
@@ -141,7 +141,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ user, onUpdate }) => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      src={previewImage || user.avatar} 
+                      src={previewImage || getFullImageUrl(user.avatar)} 
                       alt={user.name} 
                       className="w-full h-full object-cover"
                     />

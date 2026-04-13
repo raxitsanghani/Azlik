@@ -17,7 +17,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { productService, categoryService } from '../../api/apiService';
+import { productService, categoryService, getFullImageUrl } from '../../api/apiService';
 import { toast } from 'react-toastify';
 import AdminLayout from '../../components/admin/AdminLayout';
 
@@ -40,7 +40,19 @@ const AdminProducts = () => {
   const fetchProducts = useCallback(async () => {
     try {
       const response = await productService.getAll({ all: true }); 
-      setProducts(response.data.map((p: any) => ({ ...p, id: p._id || p.id })));
+      const mapped = Array.isArray(response.data) 
+        ? response.data.map((p: any) => ({
+            ...p,
+            id: p._id || p.id,
+            image: getFullImageUrl(p.image),
+            images: (p.images || []).map((img: string) => getFullImageUrl(img)),
+            variants: (p.variants || []).map((v: any) => ({
+              ...v,
+              images: (v.images || []).map((img: string) => getFullImageUrl(img))
+            }))
+          }))
+        : [];
+      setProducts(mapped);
     } catch (e) {
       console.error(e);
       toast.error('Failed to fetch products from server');
@@ -77,8 +89,7 @@ const AdminProducts = () => {
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
-    category: 'faucets',
-    newCategory: '',
+    category: 'accessories',
     price: '',
     description: '',
     material: '',
@@ -172,21 +183,7 @@ const AdminProducts = () => {
     setOpenDropdownId(null);
   };
 
-  const handleDeleteCategory = async (cat: any) => {
-    if (window.confirm(`Are you sure you want to delete the category "${cat.name}"? This WILL DELETE ALL PRODUCTS mapped to this category.`)) {
-      try {
-        await categoryService.delete(cat._id);
-        toast.success('Category and associated products deleted');
-        fetchCategories();
-        fetchProducts(); // Refresh products as they were deleted too
-        if (formData.accessoryCategory === cat.name) {
-          setFormData({ ...formData, accessoryCategory: '' });
-        }
-      } catch (err: any) {
-        toast.error('Failed to delete category');
-      }
-    }
-  };
+
 
   const handleEdit = (product: any) => {
     setEditingId(product.id || product._id);
@@ -194,7 +191,6 @@ const AdminProducts = () => {
       name: product.name,
       sku: product.sku || '',
       category: product.category,
-      newCategory: '',
       price: product.price || '',
       description: product.description || '',
       material: product.material || '',
@@ -226,7 +222,6 @@ const AdminProducts = () => {
       name: '',
       sku: `SKU-${Date.now().toString().slice(-6)}`,
       category: 'accessories',
-      newCategory: '',
       price: '',
       description: '',
       material: '',
@@ -244,11 +239,8 @@ const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let finalCategory = formData.category;
-    if(formData.category === 'Create New' && formData.newCategory) {
-        finalCategory = formData.newCategory;
-    }
-    finalCategory = normalizeCategory(finalCategory);
+    // Normalize category for display consistency
+    let finalCategory = normalizeCategory(formData.category || 'accessories');
 
     // Validation check for images
     const hasMainImages = images.length > 0;
@@ -586,70 +578,20 @@ const AdminProducts = () => {
                                        </div>
                                        <span className="text-white text-sm font-medium">{cat.name}</span>
                                      </div>
-                                     <button
-                                       type="button"
-                                       onClick={(e) => {
-                                         e.stopPropagation();
-                                         handleDeleteCategory(cat);
-                                       }}
-                                       className="p-1.5 text-white/60 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                                     >
-                                       <Trash2 className="w-4 h-4" />
-                                     </button>
                                    </div>
                                  ))}
                                  
-                                 <div className="h-[1px] bg-white/10 my-2" />
-                                 
-                                 <div 
-                                   className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 cursor-pointer transition-colors text-premium-gold"
-                                   onClick={() => {
-                                     setFormData({ ...formData, accessoryCategory: 'Create New' });
-                                     setIsCategoryDropdownOpen(false);
-                                   }}
-                                 >
-                                   <Plus className="w-4 h-4" />
-                                   <span className="text-sm font-bold">+ Add New Category</span>
-                                 </div>
+                                 {dynamicCategories.length === 0 && (
+                                   <div className="px-4 py-3 text-white/40 text-sm italic">
+                                     No categories found. Add them in the Categories section.
+                                   </div>
+                                 )}
                                </div>
                              </motion.div>
                            )}
                          </AnimatePresence>
                        </div>
                     </div>
-                    
-                    {formData.accessoryCategory === 'Create New' && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">New Category Name</label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            required
-                            value={formData.newCategory}
-                            onChange={(e) => setFormData({...formData, newCategory: e.target.value})}
-                            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-premium-charcoal/20 transition-all font-medium"
-                            placeholder="Enter new category..."
-                          />
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              if (!formData.newCategory) return toast.error('Name required');
-                              try {
-                                const res = await categoryService.create(formData.newCategory);
-                                setDynamicCategories([...dynamicCategories, res.data].sort((a, b) => a.name.localeCompare(b.name)));
-                                setFormData({ ...formData, accessoryCategory: res.data.name, newCategory: '' });
-                                toast.success('Category added');
-                              } catch (err: any) {
-                                toast.error(err.response?.data?.message || 'Failed to add');
-                              }
-                            }}
-                            className="bg-premium-gold text-white px-4 rounded-xl font-bold hover:bg-premium-gold/80"
-                          >
-                            Add
-                          </button>
-                        </div>
-                      </div>
-                    )}
 
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-gray-700 uppercase tracking-wider">Status</label>

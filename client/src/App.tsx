@@ -24,6 +24,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCollections from './pages/admin/AdminCollections';
+import AdminCategories from './pages/admin/AdminCategories';
 import AdminEnquiries from './pages/admin/AdminEnquiries';
 
 function AnimatedRoutes() {
@@ -61,6 +62,14 @@ function AnimatedRoutes() {
            element={
              <AdminProtectedRoute>
                 <AdminCollections />
+             </AdminProtectedRoute>
+           } 
+        />
+        <Route 
+           path="/admin-dashboard/categories" 
+           element={
+             <AdminProtectedRoute>
+                <AdminCategories />
              </AdminProtectedRoute>
            } 
         />

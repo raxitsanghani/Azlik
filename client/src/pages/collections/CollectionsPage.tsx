@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { collectionService } from '../../api/apiService';
+import { collectionService, getFullImageUrl } from '../../api/apiService';
 import PageLayout from '../../components/common/PageLayout';
 import ImagePreviewModal from '../../components/common/ImagePreviewModal';
 import { Link } from 'react-router-dom';
@@ -140,7 +140,14 @@ const CollectionsPage = () => {
     const fetchCollections = async () => {
       try {
         const res = await collectionService.getAll();
-        setCollections(res.data);
+        const mapped = Array.isArray(res.data) 
+          ? res.data.map((c: any) => ({
+              ...c,
+              image: getFullImageUrl(c.image),
+              images: (c.images || []).map((img: string) => getFullImageUrl(img))
+            }))
+          : [];
+        setCollections(mapped);
       } catch (err) {
         console.error("Failed to load collections", err);
         toast.error('Unable to load master collections');

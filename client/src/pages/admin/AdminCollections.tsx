@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Plus, Search, Filter, MoreVertical, Edit2, Copy, Trash2, FolderInput, Image as ImageIcon, X, UploadCloud, Eye, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collectionService } from '../../api/apiService';
+import { collectionService, getFullImageUrl } from '../../api/apiService';
 import { toast } from 'react-toastify';
 import AdminLayout from '../../components/admin/AdminLayout';
 
@@ -18,7 +18,14 @@ const AdminCollections = () => {
   const fetchCollections = useCallback(async () => {
     try {
       const response = await collectionService.getAll({ all: true });
-      setCollections(response.data);
+      const mapped = Array.isArray(response.data) 
+        ? response.data.map((c: any) => ({
+            ...c,
+            image: getFullImageUrl(c.image),
+            images: (c.images || []).map((img: string) => getFullImageUrl(img))
+          }))
+        : [];
+      setCollections(mapped);
     } catch (e) {
       console.error(e);
       toast.error('Failed to fetch collections');
