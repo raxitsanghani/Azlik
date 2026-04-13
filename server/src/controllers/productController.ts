@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import { createNotification } from './notificationController';
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
@@ -130,6 +131,15 @@ export const createProduct = async (req: any, res: Response) => {
 
     const product = new Product(productData);
     await product.save();
+
+    // Create Notification
+    await createNotification({
+      title: 'New Product Added',
+      message: `${productData.name} was successfully added to the catalog.`,
+      type: 'product_added',
+      metadata: { productId: product._id }
+    });
+
     res.status(201).json(product);
   } catch (error: any) {
     console.error('Create Product Error:', error);

@@ -78,4 +78,12 @@ export const categoryService = {
   delete: (id: string) => api.delete(`/categories/${id}`),
 };
 
+export const notificationService = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (id: string) => api.patch(`/notifications/mark-read/${id}`),
+  markAllAsRead: () => api.patch('/notifications/mark-all-read'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+  clearAll: () => api.delete('/notifications/clear-all'),
+};
+
 export default api;

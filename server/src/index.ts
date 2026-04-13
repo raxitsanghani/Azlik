@@ -9,6 +9,7 @@ import enquiryRoutes from './routes/enquiryRoutes';
 import adminRoutes from './routes/adminRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import categoryRoutes from './routes/categoryRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 import session from 'express-session';
 import passport from './config/passport';
@@ -56,6 +57,7 @@ app.use('/api/enquiry', enquiryRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/collections', collectionRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {

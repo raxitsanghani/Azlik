@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Enquiry from '../models/Enquiry';
 import User from '../models/User';
 import sendEmail from '../services/emailService';
+import { createNotification } from './notificationController';
 
 export const createEnquiry = async (req: Request, res: Response) => {
   try {
@@ -22,6 +23,14 @@ export const createEnquiry = async (req: Request, res: Response) => {
     });
 
     await newEnquiry.save();
+
+    // Create Notification
+    await createNotification({
+      title: 'New Product Enquiry',
+      message: `You have a new enquiry from ${fullName} for product ID: ${productId}`,
+      type: 'enquiry_new',
+      metadata: { enquiryId: newEnquiry._id, productId }
+    });
 
     // Optionally increment user enquiries count
     if (userId) {

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Collection from '../models/Collection';
+import { createNotification } from './notificationController';
 
 export const getAllCollections = async (req: Request, res: Response) => {
   try {
@@ -69,6 +70,14 @@ export const createCollection = async (req: any, res: Response) => {
 
     const collection = new Collection(collectionData);
     await collection.save();
+
+    // Create Notification
+    await createNotification({
+      title: 'New Collection Added',
+      message: `The "${name}" collection was added successfully.`,
+      type: 'collection_added',
+      metadata: { collectionId: collection._id }
+    });
     
     res.status(201).json(collection);
   } catch (error: any) {

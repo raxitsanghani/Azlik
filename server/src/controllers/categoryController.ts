@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Category from '../models/Category';
+import { createNotification } from './notificationController';
 
 const toSlug = (text: string) => text.toLowerCase().replace(/\./g, '').replace(/ \+ /g, '-').replace(/ /g, '-');
 
@@ -84,6 +85,15 @@ export const createCategory = async (req: Request, res: Response) => {
     });
     
     await category.save();
+
+    // Create Notification
+    await createNotification({
+      title: 'New Category Added',
+      message: `A new category "${name}" is now available for products.`,
+      type: 'product_added', // Reusing product_added icon or could add more
+      metadata: { categoryId: category._id }
+    });
+
     res.status(201).json(category);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

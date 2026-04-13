@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import sendEmail from '../services/emailService';
+import { createNotification } from './notificationController';
 
 import passport from 'passport';
 
@@ -38,6 +39,14 @@ export const signup = async (req: Request, res: Response) => {
 
     await newUser.save();
 
+    // Create Notification
+    await createNotification({
+      title: 'New User Signup',
+      message: `${name} has joined AZLIK.`,
+      type: 'user_signup',
+      metadata: { userId: newUser._id }
+    });
+
     const token = generateToken(newUser._id);
     res.status(201).json({ token, user: { id: newUser._id, name, email, role: newUser.role } });
   } catch (error: any) {
@@ -69,6 +78,15 @@ export const login = async (req: Request, res: Response) => {
 
     if (user.password && !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    if (user.role === 'admin') {
+      await createNotification({
+        title: 'Admin Login Alert',
+        message: `Admin account (${email}) was accessed just now.`,
+        type: 'admin_alert',
+        metadata: { userId: user._id, ip: req.ip }
+      });
     }
 
     const token = generateToken(user._id);
