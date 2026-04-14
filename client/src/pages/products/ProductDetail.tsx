@@ -134,6 +134,7 @@ const ProductDetail = () => {
                   <button 
                     key={idx}
                     onClick={() => setActiveImage(imgUrl)}
+                    onMouseEnter={() => setActiveImage(imgUrl)}
                     className={`shrink-0 w-24 h-24 sm:w-32 sm:h-32 bg-premium-ivory overflow-hidden premium-card border-2 transition-all duration-300 ${activeImage === imgUrl ? 'border-premium-charcoal opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                   >
                     <img 

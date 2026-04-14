@@ -65,6 +65,7 @@ const CollectionCard = ({ col, index, setPreviewImage }: { col: any; index: numb
               <button 
                 key={idx}
                 type="button"
+                onMouseEnter={() => setActiveImage(img)}
                 onClick={(e) => {
                   e.stopPropagation();
                   setActiveImage(img);

@@ -2,6 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import passport from './config/passport';
+import session from 'express-session';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import productRoutes from './routes/productRoutes';
@@ -10,9 +12,6 @@ import adminRoutes from './routes/adminRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import notificationRoutes from './routes/notificationRoutes';
-
-import session from 'express-session';
-import passport from './config/passport';
 
 import path from 'path';
 
@@ -34,6 +33,9 @@ app.options(/.*/, cors());
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Passport initialization
+app.use(passport.initialize());
 
 // Serve static files from the root uploads directory
 // __dirname is server/src, so ../../uploads is root/uploads

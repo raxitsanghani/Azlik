@@ -110,6 +110,7 @@ const ProductCard = ({ product, index, setPreviewImage }: { product: Product; in
                     <button
                       key={idx}
                       onClick={() => setActiveImage(img)}
+                      onMouseEnter={() => setActiveImage(img)}
                       className={`shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
                         activeImage === img ? 'border-premium-charcoal' : 'border-transparent opacity-50 hover:opacity-100'
                       }`}

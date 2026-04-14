@@ -102,6 +102,7 @@ const CollectionDetail = () => {
                                         transition={{ delay: idx * 0.1 }}
                                         key={idx}
                                         type="button"
+                                        onMouseEnter={() => setSelectedImage(img)}
                                         onClick={() => {
                                             setSelectedImage(img);
                                             setPreviewImage(img);

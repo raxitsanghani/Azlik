@@ -101,6 +101,13 @@ const AdminProducts = () => {
   });
   
   const [images, setImages] = useState<(File | string)[]>([]);
+  const [hoverPreview, setHoverPreview] = useState<string | null>(null);
+
+  // Helper to get preview URL for local files or strings
+  const getPreviewUrl = (img: File | string | null) => {
+    if (!img) return null;
+    return typeof img === 'string' ? img : URL.createObjectURL(img);
+  };
 
   // Variants State
   const [variants, setVariants] = useState<any[]>([]);
@@ -662,44 +669,68 @@ const AdminProducts = () => {
                   </label>
                 </div>
                    
-                    <div className="flex sm:flex-row flex-col gap-4">
-                      <div className="relative group">
-                         <input 
-                            type="file" 
-                            multiple 
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                    <div className="flex flex-col gap-4">
+                      {/* Main Preview Area */}
+                      {(images.length > 0 || hoverPreview) && (
+                        <div className="w-full h-48 sm:h-64 bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden relative group">
+                          <img 
+                            src={hoverPreview || getPreviewUrl(images[0]) || ''} 
+                            alt="Preview Main" 
+                            className="w-full h-full object-contain p-4"
                           />
-                          <div className="w-full sm:w-32 h-32 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-gray-500 group-hover:border-premium-charcoal group-hover:text-premium-charcoal group-hover:bg-gray-50 transition-all">
-                             <UploadCloud size={28} className="mb-2" />
-                             <span className="text-xs font-bold">Upload</span>
-                          </div>
-                      </div>
+                          {!hoverPreview && images.length > 0 && (
+                             <div className="absolute top-4 left-4 bg-premium-charcoal text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Default Main</div>
+                          )}
+                          {hoverPreview && (
+                             <div className="absolute top-4 left-4 bg-premium-royal text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Viewing Preview</div>
+                          )}
+                        </div>
+                      )}
 
-                      <div className="flex-1 flex gap-4 overflow-x-auto pb-2 custom-scrollbar items-center">
-                        {images.map((img, index) => (
-                           <motion.div 
-                             initial={{ opacity: 0, scale: 0.8 }}
-                             animate={{ opacity: 1, scale: 1 }}
-                             key={index} 
-                             className="relative w-32 h-32 rounded-2xl overflow-hidden shrink-0 border border-gray-200 group flex items-center justify-center bg-gray-50"
-                           >
-                             <img src={typeof img === 'string' ? img : URL.createObjectURL(img as File)} alt={`Preview ${index}`} className="w-full h-full object-cover" />
-                             {index === 0 && (
-                               <div className="absolute top-2 left-2 bg-premium-charcoal text-white text-[10px] uppercase font-bold px-2 py-1 rounded">Cover</div>
-                             )}
-                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
-                                <button 
-                                  type="button" 
-                                  onClick={() => removeImage(index)}
-                                  className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors transform hover:scale-110"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                             </div>
-                           </motion.div>
-                        ))}
+                      <div className="flex sm:flex-row flex-col gap-4">
+                        <div className="relative group shrink-0">
+                           <input 
+                              type="file" 
+                              multiple 
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                            />
+                            <div className="w-full sm:w-32 h-32 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-gray-400 group-hover:border-premium-charcoal group-hover:text-premium-charcoal group-hover:bg-gray-50 transition-all">
+                               <UploadCloud size={28} className="mb-2" />
+                               <span className="text-[10px] font-bold uppercase">Upload</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex gap-4 overflow-x-auto pb-4 custom-scrollbar items-center">
+                          {images.map((img, index) => (
+                             <motion.div 
+                               initial={{ opacity: 0, scale: 0.8 }}
+                               animate={{ opacity: 1, scale: 1 }}
+                               key={index}
+                               onMouseEnter={() => setHoverPreview(getPreviewUrl(img))}
+                               onMouseLeave={() => setHoverPreview(null)}
+                               className={`relative w-32 h-32 rounded-2xl overflow-hidden shrink-0 border-2 transition-all group flex items-center justify-center bg-gray-50 
+                                 ${(hoverPreview === getPreviewUrl(img) || (!hoverPreview && index === 0)) ? 'border-premium-charcoal shadow-md' : 'border-gray-100 opacity-60 hover:opacity-100'}`}
+                             >
+                               <img src={getPreviewUrl(img) || ''} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                               {index === 0 && (
+                                 <div className="absolute top-2 left-2 bg-premium-charcoal text-white text-[10px] uppercase font-bold px-2 py-1 rounded">Cover</div>
+                               )}
+                               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      removeImage(index);
+                                      setHoverPreview(null);
+                                    }}
+                                    className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors transform hover:scale-110"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                               </div>
+                             </motion.div>
+                          ))}
                         {images.length === 0 && (
                           <div className="flex-1 h-32 hidden sm:flex items-center justify-center border-2 border-dashed border-transparent text-gray-500 text-sm font-medium">
                             <ImageIcon size={20} className="mr-2 opacity-80" />
@@ -709,6 +740,7 @@ const AdminProducts = () => {
                       </div>
                     </div>
                   </div>
+                </div>
 
                   <div className="space-y-4 pt-4 border-t border-gray-100">
                     <div className="flex justify-between items-center">
@@ -797,10 +829,13 @@ const AdminProducts = () => {
                                    <motion.div 
                                      initial={{ opacity: 0, scale: 0.8 }}
                                      animate={{ opacity: 1, scale: 1 }}
-                                     key={imgIndex} 
-                                     className="relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border border-gray-200 group flex items-center justify-center bg-white"
+                                     key={imgIndex}
+                                     onMouseEnter={() => setHoverPreview(getPreviewUrl(img))}
+                                     onMouseLeave={() => setHoverPreview(null)}
+                                     className={`relative w-24 h-24 rounded-xl overflow-hidden shrink-0 border-2 transition-all group flex items-center justify-center bg-white
+                                       ${hoverPreview === getPreviewUrl(img) ? 'border-premium-charcoal shadow-md' : 'border-gray-100 opacity-60 hover:opacity-100'}`}
                                    >
-                                     <img src={typeof img === 'string' ? img : URL.createObjectURL(img as File)} alt={`Variant ${imgIndex}`} className="w-full h-full object-cover" />
+                                     <img src={getPreviewUrl(img) || ''} alt={`Variant ${imgIndex}`} className="w-full h-full object-cover" />
                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                                         <button 
                                           type="button" 
