@@ -385,13 +385,20 @@ const AdminCollections = () => {
                       {/* Main Preview Area */}
                       {(images.length > 0 || hoverPreview) && (
                         <div className="w-full h-48 sm:h-64 bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden relative group">
-                          <img 
-                            src={hoverPreview || getPreviewUrl(images[0]) || ''} 
-                            alt="Preview Main" 
-                            className="w-full h-full object-contain p-4"
-                          />
+                          <AnimatePresence mode="wait">
+                            <motion.img 
+                              key={hoverPreview || (images.length > 0 ? getPreviewUrl(images[0]) : 'empty')}
+                              initial={{ opacity: 0, scale: 1.05 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 1.02 }}
+                              transition={{ duration: 0.35 }}
+                              src={hoverPreview || getPreviewUrl(images[0]) || ''} 
+                              alt="Preview Main" 
+                              className="w-full h-full object-contain p-4 transition-all"
+                            />
+                          </AnimatePresence>
                           {!hoverPreview && images.length > 0 && (
-                             <div className="absolute top-4 left-4 bg-premium-charcoal text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Default Main</div>
+                             <div className="absolute top-4 left-4 bg-premium-charcoal text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-lg">Default Main</div>
                           )}
                         </div>
                       )}

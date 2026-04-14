@@ -14,10 +14,11 @@ type FilterState = {
 
 const normalizeCategory = (value: string) => value.trim().toLowerCase();
 
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard = React.forwardRef(({ product }: { product: Product }, ref: any) => {
   return (
     <motion.div
       layout
+      ref={ref}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
@@ -66,7 +67,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 const ProductCardSkeleton: React.FC = () => {
   return (

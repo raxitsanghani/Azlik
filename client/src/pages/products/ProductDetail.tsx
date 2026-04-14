@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Share2, Ruler, ShieldCheck, Package } from 'lucide-react';
 import { Product } from '../../data/products';
 import ProductEnquiryModal from '../../components/enquiry/ProductEnquiryModal';
@@ -116,16 +116,24 @@ const ProductDetail = () => {
             transition={{ duration: 0.6 }}
             className="space-y-8"
           >
-            <div className="premium-card aspect-[4/5] overflow-hidden bg-gray-50 flex items-center justify-center">
-              <motion.img 
-                key={activeImage}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                src={activeImage || '/placeholder-product.jpg'} 
-                alt={product.name} 
-                className="w-full h-full object-cover transition-transform duration-[1.5s] hover:scale-105"
-                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
-              />
+            <div className="premium-card aspect-[4/5] overflow-hidden bg-gray-50 flex items-center justify-center relative">
+              <AnimatePresence mode="wait">
+                <motion.img 
+                  key={activeImage}
+                  initial={{ opacity: 0, scale: 1.08 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ 
+                    opacity: { duration: 0.4, ease: "easeOut" },
+                    scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } 
+                  }}
+                  src={activeImage || '/placeholder-product.jpg'} 
+                  alt={product.name} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
+                />
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-transparent hover:bg-black/5 transition-colors pointer-events-none" />
             </div>
             
             {galleryImages.length > 0 && (

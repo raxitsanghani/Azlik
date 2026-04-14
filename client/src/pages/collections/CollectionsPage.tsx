@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { collectionService, getFullImageUrl } from '../../api/apiService';
 import PageLayout from '../../components/common/PageLayout';
 import ImagePreviewModal from '../../components/common/ImagePreviewModal';
@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Box, Sparkles } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-const CollectionCard = ({ col, index, setPreviewImage }: { col: any; index: number; setPreviewImage: (img: string) => void }) => {
+const CollectionCard = React.forwardRef(({ col, index, setPreviewImage }: { col: any; index: number; setPreviewImage: (img: string) => void }, ref: any) => {
   const allImages = React.useMemo(() => {
     const list = [...(col.images || [])];
     if (list.length === 0 && col.image) list.push(col.image);
@@ -23,7 +23,7 @@ const CollectionCard = ({ col, index, setPreviewImage }: { col: any; index: numb
   }, [allImages, col.image]);
 
   return (
-    <div key={col._id} className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-24 items-center`}>
+    <div key={col._id} ref={ref} className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-24 items-center`}>
       {/* Image Presentation */}
       <div className="w-full lg:w-3/5 space-y-6">
         <div className="relative group cursor-zoom-in" onClick={() => setPreviewImage(activeImage)}>
@@ -34,13 +34,23 @@ const CollectionCard = ({ col, index, setPreviewImage }: { col: any; index: numb
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             className="aspect-[16/10] bg-gray-100 overflow-hidden relative shadow-2xl shadow-black/5 rounded-2xl"
           >
-            <img 
-              src={activeImage} 
-              alt={col.name} 
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-700"></div>
-            <div className="absolute bottom-10 left-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 transform tracking-[0.3em] text-[10px] uppercase font-bold drop-shadow-lg flex items-center gap-2">
+            <AnimatePresence mode="wait">
+              <motion.img 
+                key={activeImage}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ 
+                  opacity: { duration: 0.4 },
+                  scale: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } 
+                }}
+                src={activeImage} 
+                alt={col.name} 
+                className="w-full h-full object-cover" 
+              />
+            </AnimatePresence>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-700 pointer-events-none"></div>
+            <div className="absolute bottom-10 left-10 text-white opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0 transform tracking-[0.3em] text-[10px] uppercase font-bold drop-shadow-lg flex items-center gap-2 pointer-events-none">
               View Full Reveal <ArrowRight size={14} />
             </div>
           </motion.div>
@@ -130,7 +140,7 @@ const CollectionCard = ({ col, index, setPreviewImage }: { col: any; index: numb
       </div>
     </div>
   );
-};
+});
 
 const CollectionsPage = () => {
   const [collections, setCollections] = useState<any[]>([]);

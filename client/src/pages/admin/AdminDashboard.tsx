@@ -135,8 +135,8 @@ const AdminDashboard = () => {
               <option>This Year</option>
             </select>
           </div>
-          <div className="w-full min-h-[300px] mt-4" style={{ height: 300 }}>
-            <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+          <div className="w-full h-[300px] mt-4 relative">
+            <ResponsiveContainer width="99%" height="100%">
               <AreaChart data={visitorData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
@@ -168,8 +168,8 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-bold text-premium-charcoal">Category Views</h3>
             <p className="text-sm text-gray-500">Most popular product categories</p>
           </div>
-          <div className="flex-1 min-h-[300px] mt-4 w-full" style={{ height: 300 }}>
-             <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+          <div className="flex-1 h-[300px] mt-4 w-full relative">
+             <ResponsiveContainer width="99%" height="100%">
               <BarChart data={categoryData} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
                 <XAxis type="number" hide />

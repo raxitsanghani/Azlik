@@ -16,7 +16,7 @@ router.use(protect, adminProtect);
 router.get('/', getNotifications);
 router.patch('/mark-read/:id', markAsRead);
 router.patch('/mark-all-read', markAllAsRead);
-router.delete('/:id', deleteNotification);
 router.delete('/clear-all', clearAllNotifications);
+router.delete('/:id', deleteNotification);
 
 export default router;

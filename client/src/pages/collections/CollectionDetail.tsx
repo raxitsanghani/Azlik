@@ -84,11 +84,21 @@ const CollectionDetail = () => {
                                 className="aspect-square bg-gray-50 rounded-2xl overflow-hidden relative group shadow-2xl shadow-black/5 cursor-zoom-in"
                                 onClick={() => setPreviewImage(selectedImage)}
                             >
-                                <img 
-                                    src={selectedImage} 
-                                    alt={collection.name} 
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                                />
+                                <AnimatePresence mode="wait">
+                                    <motion.img 
+                                        key={selectedImage}
+                                        initial={{ opacity: 0, scale: 1.05 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 1.02 }}
+                                        transition={{ 
+                                            opacity: { duration: 0.4 },
+                                            scale: { duration: 0.5, ease: "easeOut" }
+                                        }}
+                                        src={selectedImage} 
+                                        alt={collection.name} 
+                                        className="w-full h-full object-cover" 
+                                    />
+                                </AnimatePresence>
                                 <div className="absolute top-6 right-6 p-4 bg-white/10 backdrop-blur-md rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Maximize2 size={20} />
                                 </div>

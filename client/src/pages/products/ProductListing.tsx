@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, forwardRef } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X } from 'lucide-react';
@@ -6,7 +6,7 @@ import { Product } from '../../data/products';
 import { useProducts } from '../../hooks/useProducts';
 import ImagePreviewModal from '../../components/common/ImagePreviewModal';
 
-const ProductCard = ({ product, index, setPreviewImage }: { product: Product; index: number; setPreviewImage: (img: string) => void }) => {
+const ProductCard = forwardRef(({ product, index, setPreviewImage }: { product: Product; index: number; setPreviewImage: (img: string) => void }, ref: any) => {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(product.image || (product.images && product.images[0]) || '/placeholder-product.jpg');
 
@@ -36,6 +36,7 @@ const ProductCard = ({ product, index, setPreviewImage }: { product: Product; in
   return (
     <motion.div
       layout
+      ref={ref}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
@@ -44,16 +45,23 @@ const ProductCard = ({ product, index, setPreviewImage }: { product: Product; in
     >
       <div className="block cursor-zoom-in relative mb-6" onClick={() => setPreviewImage(activeImage)}>
         <div className="premium-card overflow-hidden relative aspect-[4/5] bg-gray-50 flex items-center justify-center rounded-lg">
-          <motion.img
-            key={activeImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            src={activeImage}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
-          />
-          <div className="absolute inset-0 bg-premium-charcoal/0 group-hover:bg-premium-charcoal/10 transition-colors duration-500" />
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={activeImage}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.02 }}
+              transition={{ 
+                opacity: { duration: 0.35 },
+                scale: { duration: 0.45, ease: "easeOut" }
+              }}
+              src={activeImage}
+              alt={product.name}
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.jpg'; }}
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-premium-charcoal/0 group-hover:bg-premium-charcoal/5 transition-colors duration-500 pointer-events-none" />
           <div className="absolute top-4 left-4">
             <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-[9px] uppercase tracking-[0.2em] font-bold shadow-sm">
               {product.category}
@@ -134,7 +142,7 @@ const ProductCard = ({ product, index, setPreviewImage }: { product: Product; in
       </div>
     </motion.div>
   );
-};
+});
 
 const ProductListing = () => {
   const { category: urlCategory } = useParams<{ category?: string }>();
