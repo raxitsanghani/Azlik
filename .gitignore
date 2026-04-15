@@ -6,19 +6,16 @@ server/dist/
 client/dist/
 
 # Environment variables (Crucial for security)
-.env
-.env.*
+**/.env
+**/.env.*
 !.env.example
-client/.env
-client/.env.*
-server/.env
-server/.env.*
+!**/.env.example
 
 # Local development files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
 
 # Uploads / Persistent Data (Never push user data)
 uploads/
