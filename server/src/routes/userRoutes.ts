@@ -4,23 +4,12 @@ import { getProfile, updateProfile, changePassword, uploadAvatar, getAllUsers, d
 import { protect, adminProtect } from '../middleware/authMiddleware';
 import multer from 'multer';
 import path from 'path';
+import { makeStorage } from '../config/cloudinary';
 
 const router = Router();
 
-// Configure Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../../../uploads');
-    cb(null, uploadPath);
-  },
-  filename: (req: any, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `avatar-${req.user._id}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
+const upload = multer({
+  storage: makeStorage('avatars'),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|webp/;

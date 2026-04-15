@@ -63,13 +63,9 @@ export const createProduct = async (req: any, res: Response) => {
         }
     }
     
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const baseUrl = `${protocol}://${host}`;
-
     if (req.files && Array.isArray(req.files)) {
       const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainImages.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+      const newImages = mainImages.map((file: any) => file.path);
       images.push(...newImages);
     }
 
@@ -102,7 +98,7 @@ export const createProduct = async (req: any, res: Response) => {
 
           if (req.files && Array.isArray(req.files)) {
             const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
-            const vNewImages = vFiles.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+            const vNewImages = vFiles.map((file: any) => file.path);
             variantImages.push(...vNewImages);
           }
           
@@ -160,13 +156,9 @@ export const updateProduct = async (req: any, res: Response) => {
         }
     }
     
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const baseUrl = `${protocol}://${host}`;
-
     if (req.files && Array.isArray(req.files)) {
       const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainImages.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+      const newImages = mainImages.map((file: any) => file.path);
       images.push(...newImages);
     }
 
@@ -199,7 +191,7 @@ export const updateProduct = async (req: any, res: Response) => {
 
           if (req.files && Array.isArray(req.files)) {
             const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
-            const vNewImages = vFiles.map((file: any) => `${baseUrl}/uploads/products/${file.filename}`);
+            const vNewImages = vFiles.map((file: any) => file.path);
             variantImages.push(...vNewImages);
           }
           
