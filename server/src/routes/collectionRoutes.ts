@@ -9,22 +9,12 @@ import {
 import { protect, adminProtect } from '../middleware/authMiddleware';
 import multer from 'multer';
 import path from 'path';
+import { makeStorage } from '../config/cloudinary';
 
 const router = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../../../uploads/collections');
-    cb(null, uploadPath);
-  },
-  filename: (req: any, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, `collection-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
+const upload = multer({
+  storage: makeStorage('collections'),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|webp/;

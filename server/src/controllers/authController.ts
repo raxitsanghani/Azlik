@@ -101,20 +101,21 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
     const user: any = req.user;
     console.log('Google Auth Callback reached. User:', user?.email);
     
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     if (!user) {
       console.error('Google Auth failed: No user found in request');
-      return res.redirect('http://localhost:5173/login?error=auth_failed');
+      return res.redirect(`${frontendUrl}/login?error=auth_failed`);
     }
 
     const token = generateToken(user._id);
-    const userData = encodeURIComponent(JSON.stringify({ 
-      id: user._id, 
-      name: user.name, 
-      email: user.email, 
-      role: user.role 
+    const userData = encodeURIComponent(JSON.stringify({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role
     }));
 
-    const redirectUrl = `http://localhost:5173/login?token=${token}&user=${userData}`;
+    const redirectUrl = `${frontendUrl}/login?token=${token}&user=${userData}`;
     console.log('Redirecting to:', redirectUrl);
     
     // Using a meta refresh or script redirect can sometimes bypass strict 302 origin checks in local dev
@@ -129,7 +130,8 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
     `);
   } catch (error: any) {
     console.error('Google Auth Callback Error:', error);
-    res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error.message)}`);
   }
 };
 

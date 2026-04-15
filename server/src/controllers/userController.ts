@@ -71,10 +71,8 @@ export const uploadAvatar = async (req: any, res: Response) => {
       return res.status(400).json({ message: 'Please upload a file' });
     }
 
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const avatarUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-    
+    const avatarUrl = req.file.path;
+
     const user = await User.findById(req.user._id);
 
     if (user) {
