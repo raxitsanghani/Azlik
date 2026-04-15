@@ -1,0 +1,89 @@
+/// <reference types="vite/client" />
+import axios from 'axios';
+
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:2112/api';
+export const BASE_URL = API_URL.replace('/api', '');
+
+export const getFullImageUrl = (path: string) => {
+  if (!path) return '/placeholder-product.jpg';
+  if (path.startsWith('http')) return path;
+  if (path.startsWith('/uploads')) return `${BASE_URL}${path}`;
+  if (path.startsWith('uploads')) return `${BASE_URL}/${path}`;
+  return path;
+};
+
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || JSON.parse(localStorage.getItem('user') || 'null')?.token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const authService = {
+  login: (data: any) => api.post('/auth/login', data),
+  signup: (data: any) => api.post('/auth/signup', data),
+  forgotPassword: (data: any) => api.post('/auth/forgot-password', data),
+  resetPassword: (data: any) => api.post('/auth/reset-password', data),
+  verifyOtp: (data: any) => api.post('/auth/verify-otp', data),
+  googleLogin: (data: any) => api.post('/auth/google', data),
+};
+
+export const userService = {
+  getProfile: () => api.get('/user/profile'),
+  updateProfile: (data: any) => api.put('/user/profile', data),
+  changePassword: (data: any) => api.put('/user/change-password', data),
+  uploadAvatar: (formData: FormData) => api.post('/user/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getAllUsers: () => api.get('/user/all'),
+  deleteUser: (id: string) => api.delete(`/user/${id}`),
+};
+
+export const productService = {
+  getAll: (params?: any) => api.get('/products', { params }),
+  getFeatured: () => api.get('/products/featured'),
+  getById: (id: string) => api.get(`/products/${id}`),
+  getBySku: (sku: string) => api.get(`/products/sku/${sku}`),
+  create: (data: any) => api.post('/products', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  update: (id: string, data: any) => api.put(`/products/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  delete: (id: string) => api.delete(`/products/${id}`),
+};
+
+export const enquiryService = {
+  create: (data: any) => api.post('/enquiry', data),
+  getAll: () => api.get('/enquiry'),
+  getUserEnquiries: () => api.get('/enquiry/my'),
+};
+
+export const adminService = {
+  getStats: () => api.get('/admin/stats'),
+};
+
+export const collectionService = {
+  getAll: (params?: any) => api.get('/collections', { params }),
+  getById: (id: string) => api.get(`/collections/${id}`),
+  create: (data: any) => api.post('/collections', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  update: (id: string, data: any) => api.put(`/collections/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  delete: (id: string) => api.delete(`/collections/${id}`),
+};
+
+export const categoryService = {
+  getAll: () => api.get('/categories'),
+  create: (name: string) => api.post('/categories', { name }),
+  delete: (id: string) => api.delete(`/categories/${id}`),
+};
+
+export const notificationService = {
+  getAll: () => api.get('/notifications'),
+  markAsRead: (id: string) => api.patch(`/notifications/mark-read/${id}`),
+  markAllAsRead: () => api.patch('/notifications/mark-all-read'),
+  delete: (id: string) => api.delete(`/notifications/${id}`),
+  clearAll: () => api.delete('/notifications/clear-all'),
+};
+
+export default api;
