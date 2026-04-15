@@ -1,6 +1,11 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables immediately
+dotenv.config({ path: path.join(__dirname, '../../.env') });
+
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import passport from './config/passport';
 import session from 'express-session';
@@ -12,11 +17,6 @@ import adminRoutes from './routes/adminRoutes';
 import collectionRoutes from './routes/collectionRoutes';
 import categoryRoutes from './routes/categoryRoutes';
 import notificationRoutes from './routes/notificationRoutes';
-
-import path from 'path';
-
-// Load environment variables from root directory
-dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 const app = express();
 
@@ -34,8 +34,24 @@ app.options(/.*/, cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Session configuration for Passport
+app.use(session({
+  name: 'azlik_session_id', // Custom name to avoid conflicts
+  secret: process.env.SESSION_SECRET || 'azlik_premium_session_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Needed for cross-domain in production
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  },
+  proxy: true // Trust reverse proxy (needed for platforms like Vercel/Heroku)
+}));
+
 // Passport initialization
 app.use(passport.initialize());
+app.use(passport.session());
 
 // Serve static files from the root uploads directory
 // __dirname is server/src, so ../../uploads is root/uploads
