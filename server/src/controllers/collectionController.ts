@@ -42,7 +42,7 @@ export const createCollection = async (req: any, res: Response) => {
     
     if (req.files && Array.isArray(req.files)) {
       const mainFiles = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainFiles.map((file: any) => file.path);
+      const newImages = mainFiles.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/collections/${file.filename}` : file.path);
       images.push(...newImages);
     }
 
@@ -99,7 +99,7 @@ export const updateCollection = async (req: any, res: Response) => {
     
     if (req.files && Array.isArray(req.files)) {
       const mainFiles = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainFiles.map((file: any) => file.path);
+      const newImages = mainFiles.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/collections/${file.filename}` : file.path);
       images.push(...newImages);
     }
 

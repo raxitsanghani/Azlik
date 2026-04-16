@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Button from '../common/Button';
 import { ArrowRight, Instagram, Facebook, Twitter, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from '../common/Logo';
 
 const Footer: React.FC = () => {
   return (
@@ -41,7 +42,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
           <div className="space-y-8">
-            <h2 className="text-2xl font-serif tracking-[0.2em] italic">AZLIK</h2>
+            <Logo isDark={false} className="scale-110 origin-left" />
             <p className="text-white/40 font-light text-sm leading-relaxed max-w-xs">
               Curating the world's finest bathroom sanctuary collections since 1994. 
               Excellence in every detail, luxury in every drop.

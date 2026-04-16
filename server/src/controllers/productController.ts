@@ -65,7 +65,7 @@ export const createProduct = async (req: any, res: Response) => {
     
     if (req.files && Array.isArray(req.files)) {
       const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainImages.map((file: any) => file.path);
+      const newImages = mainImages.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}` : file.path);
       images.push(...newImages);
     }
 
@@ -98,7 +98,7 @@ export const createProduct = async (req: any, res: Response) => {
 
           if (req.files && Array.isArray(req.files)) {
             const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
-            const vNewImages = vFiles.map((file: any) => file.path);
+            const vNewImages = vFiles.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}` : file.path);
             variantImages.push(...vNewImages);
           }
           
@@ -158,7 +158,7 @@ export const updateProduct = async (req: any, res: Response) => {
     
     if (req.files && Array.isArray(req.files)) {
       const mainImages = req.files.filter((f: any) => f.fieldname === 'images' || f.fieldname === 'image');
-      const newImages = mainImages.map((file: any) => file.path);
+      const newImages = mainImages.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}` : file.path);
       images.push(...newImages);
     }
 
@@ -191,7 +191,7 @@ export const updateProduct = async (req: any, res: Response) => {
 
           if (req.files && Array.isArray(req.files)) {
             const vFiles = req.files.filter((f: any) => f.fieldname === `variantImages_${index}`);
-            const vNewImages = vFiles.map((file: any) => file.path);
+            const vNewImages = vFiles.map((file: any) => file.filename ? `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}` : file.path);
             variantImages.push(...vNewImages);
           }
           
