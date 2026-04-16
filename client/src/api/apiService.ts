@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import axios from 'axios';
 
-export const API_URL = import.meta.env.VITE_API_URL || '/api';
+export const API_URL = import.meta.env.VITE_API_URL || '';
 export const BASE_URL = API_URL.replace('/api', '');
 
 export const getFullImageUrl = (path: string) => {
@@ -25,65 +25,65 @@ api.interceptors.request.use((config) => {
 });
 
 export const authService = {
-  login: (data: any) => api.post('/auth/login', data),
-  signup: (data: any) => api.post('/auth/signup', data),
-  forgotPassword: (data: any) => api.post('/auth/forgot-password', data),
-  resetPassword: (data: any) => api.post('/auth/reset-password', data),
-  verifyOtp: (data: any) => api.post('/auth/verify-otp', data),
-  googleLogin: (data: any) => api.post('/auth/google', data),
+  login: (data: any) => api.post('/api/auth/login', data),
+  signup: (data: any) => api.post('/api/auth/signup', data),
+  forgotPassword: (data: any) => api.post('/api/auth/forgot-password', data),
+  resetPassword: (data: any) => api.post('/api/auth/reset-password', data),
+  verifyOtp: (data: any) => api.post('/api/auth/verify-otp', data),
+  googleLogin: (data: any) => api.post('/api/auth/google', data),
 };
 
 export const userService = {
-  getProfile: () => api.get('/user/profile'),
-  updateProfile: (data: any) => api.put('/user/profile', data),
-  changePassword: (data: any) => api.put('/user/change-password', data),
-  uploadAvatar: (formData: FormData) => api.post('/user/avatar', formData, {
+  getProfile: () => api.get('/api/user/profile'),
+  updateProfile: (data: any) => api.put('/api/user/profile', data),
+  changePassword: (data: any) => api.put('/api/user/change-password', data),
+  uploadAvatar: (formData: FormData) => api.post('/api/user/avatar', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  getAllUsers: () => api.get('/user/all'),
-  deleteUser: (id: string) => api.delete(`/user/${id}`),
+  getAllUsers: () => api.get('/api/user/all'),
+  deleteUser: (id: string) => api.delete(`/api/user/${id}`),
 };
 
 export const productService = {
-  getAll: (params?: any) => api.get('/products', { params }),
-  getFeatured: () => api.get('/products/featured'),
-  getById: (id: string) => api.get(`/products/${id}`),
-  getBySku: (sku: string) => api.get(`/products/sku/${sku}`),
-  create: (data: any) => api.post('/products', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
-  update: (id: string, data: any) => api.put(`/products/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
-  delete: (id: string) => api.delete(`/products/${id}`),
+  getAll: (params?: any) => api.get('/api/products', { params }),
+  getFeatured: () => api.get('/api/products/featured'),
+  getById: (id: string) => api.get(`/api/products/${id}`),
+  getBySku: (sku: string) => api.get(`/api/products/sku/${sku}`),
+  create: (data: any) => api.post('/api/products', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  update: (id: string, data: any) => api.put(`/api/products/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  delete: (id: string) => api.delete(`/api/products/${id}`),
 };
 
 export const enquiryService = {
-  create: (data: any) => api.post('/enquiry', data),
-  getAll: () => api.get('/enquiry'),
-  getUserEnquiries: () => api.get('/enquiry/my'),
+  create: (data: any) => api.post('/api/enquiry', data),
+  getAll: () => api.get('/api/enquiry'),
+  getUserEnquiries: () => api.get('/api/enquiry/my'),
 };
 
 export const adminService = {
-  getStats: () => api.get('/admin/stats'),
+  getStats: () => api.get('/api/admin/stats'),
 };
 
 export const collectionService = {
-  getAll: (params?: any) => api.get('/collections', { params }),
-  getById: (id: string) => api.get(`/collections/${id}`),
-  create: (data: any) => api.post('/collections', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
-  update: (id: string, data: any) => api.put(`/collections/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
-  delete: (id: string) => api.delete(`/collections/${id}`),
+  getAll: (params?: any) => api.get('/api/collections', { params }),
+  getById: (id: string) => api.get(`/api/collections/${id}`),
+  create: (data: any) => api.post('/api/collections', data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  update: (id: string, data: any) => api.put(`/api/collections/${id}`, data, data instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}),
+  delete: (id: string) => api.delete(`/api/collections/${id}`),
 };
 
 export const categoryService = {
-  getAll: () => api.get('/categories'),
-  create: (name: string) => api.post('/categories', { name }),
-  delete: (id: string) => api.delete(`/categories/${id}`),
+  getAll: () => api.get('/api/categories'),
+  create: (name: string) => api.post('/api/categories', { name }),
+  delete: (id: string) => api.delete(`/api/categories/${id}`),
 };
 
 export const notificationService = {
-  getAll: () => api.get('/notifications'),
-  markAsRead: (id: string) => api.patch(`/notifications/mark-read/${id}`),
-  markAllAsRead: () => api.patch('/notifications/mark-all-read'),
-  delete: (id: string) => api.delete(`/notifications/${id}`),
-  clearAll: () => api.delete('/notifications/clear-all'),
+  getAll: () => api.get('/api/notifications'),
+  markAsRead: (id: string) => api.patch(`/api/notifications/mark-read/${id}`),
+  markAllAsRead: () => api.patch('/api/notifications/mark-all-read'),
+  delete: (id: string) => api.delete(`/api/notifications/${id}`),
+  clearAll: () => api.delete('/api/notifications/clear-all'),
 };
 
 export default api;
